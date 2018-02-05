@@ -1,0 +1,41 @@
+{
+  "extends": ["airbnb/base", "plugin:flowtype/recommended"],
+  "plugins": [
+    "eslint-plugin-flowtype"
+  ],
+  "rules":{
+    "no-console": ["error", { "allow": ["warn", "log"] }],
+    "space-in-parens": ["error", "always"],
+    "computed-property-spacing": ["error", "always"],
+    "key-spacing": ["error", {"beforeColon": true, "afterColon": true, "align": "colon"}],
+    "no-multi-spaces": ["error", { "ignoreEOLComments": true,"exceptions": { "BinaryExpression": true,"ImportDeclaration": true,"VariableDeclarator": true } }],
+    "space-before-function-paren": ["error", "always"],
+    "import/no-dynamic-require": 0,
+    "no-underscore-dangle": 0,
+    "max-len": ["error", 140]
+  },
+  "settings": {
+    "flowtype": {
+      "onlyFilesWithFlowAnnotation": false
+    }
+  },
+  "parser": "babel-eslint",
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "sourceType": "module",
+    "allowImportExportEverywhere": true
+  },
+  "globals": {
+    "$config": true,
+    "$log": true,
+    "$accessTokenPem": true,
+    "$enum": true,
+    "$tvRating": true,
+    "$twitterTrends": true,
+    "$responseHandler": true
+  },
+  "env": {
+    "es6": true,
+    "node": true
+  }
+}
