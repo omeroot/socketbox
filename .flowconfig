@@ -9,5 +9,6 @@
 [lints]
 
 [options]
+esproposal.decorators=ignore
 
 [strict]

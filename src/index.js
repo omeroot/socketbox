@@ -18,4 +18,3 @@ Dog.totalAnimalCount += 1;
 Dog.totalAnimalCount += 1;
 
 console.log( Dog.totalAnimalCount );
-
