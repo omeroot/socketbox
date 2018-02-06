@@ -2,7 +2,7 @@ import Router from './router';
 import Client from './client';
 import Cache from './cache';
 
-export default ( sockerServer ) => {
+const createServer =  ( sockerServer ) => {
   sockerServer.on( 'connection', ( socket, req ) => {
     const newClient = new Client( socket, req );
     Cache.set( newClient );
@@ -11,4 +11,4 @@ export default ( sockerServer ) => {
   } );
 };
 
-export { Router };
+export default { createServer, Router };

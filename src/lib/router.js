@@ -1,5 +1,4 @@
 // @flow
-import Request from './request';
 
 export default class Router {
   static instance = null;
@@ -7,7 +6,7 @@ export default class Router {
   routePath: Array<string> = [];
   mapping: {[index: string]: Array<Function>} = {};
 
-  constructor () {
+  static constructor () {
     if ( !Router.instance ) Router.instance = new Router();
     return Router.instance;
   }
@@ -17,9 +16,12 @@ export default class Router {
 
     const index: number = this.routePath.push( path );
     this.mapping[ index.toString() ] = args;
+
+    return true;
   }
 
-  callNextFunctions ( coming: any, req: Request, res: any ) {
+  callNextFunctions ( coming: any, req: any, res: any ) {
+    console.log( '>>>>>>', this );
     const pointer = this.routePath.indexOf( coming.url );
     console.log( pointer );
   }

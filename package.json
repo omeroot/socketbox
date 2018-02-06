@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register test/*",
+    "test": "mocha --compilers js:babel-core/register test/* --inspector",
     "build": "rm -rf dist/* && webpack --progress --colors",
     "build:prod": "rm -rf dist/* && ./node_modules/.bin/babel src/ -d dist/ --source-maps inline",
     "pull": "git pull && npm run build:prod"
