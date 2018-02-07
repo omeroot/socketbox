@@ -106,7 +106,7 @@ req.hash; // #hash
 ## Response
 You can put string, json or buffer to message.
 ```js
-  res.send(JSON.stringify({name: 'omer'}));
+res.send(JSON.stringify({name: 'omer'}));
 
-  res.send(new Buffer('omer'));
+res.send(new Buffer('omer'));
 ```
