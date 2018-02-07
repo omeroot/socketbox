@@ -1,7 +1,7 @@
 {
   "name": "socketbox",
   "version": "0.1.0",
-  "description": "",
+  "description": "Horn is real time socket layer framework inspired by express",
   "main": "dist/socketbox.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register test/* --inspector",
