@@ -1,13 +1,18 @@
 import WebSocket from 'ws';
-import Horn from './../src';
+import Socketbox from './../dist/socketbox';
+
+const Socketbox1 = require( './../dist/socketbox' );
+
+console.log( Socketbox );
+console.log( Socketbox1 );
 
 const ws = new WebSocket.Server( { port : 8080 } );
 
-Horn.createServer( ws );
+Socketbox.createServer( ws );
 
-const router = Horn.Router();
+const router = Socketbox.Router();
 
-Horn.use( '/', router );
+Socketbox.use( '/', router );
 
 const mid1 = ( req, res, next ) => {
   req.user = {};
@@ -19,6 +24,10 @@ const mid2 = ( req, res, next ) => {
   req.user.age = 27;
   next();
 };
+
+router.register( '/profile', mid1, ( req, res ) => {
+  res.send( req.user );
+} );
 
 router.register( '/message/write', mid1, mid2, ( req, res ) => {
   console.log( 'User', req.user );

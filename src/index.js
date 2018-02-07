@@ -1,1 +1,3 @@
-module.exports = require( './lib/horn' );
+import Socketbox from './lib/socketbox';
+
+export default Socketbox;

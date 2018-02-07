@@ -4,7 +4,7 @@ import Route from './route';
 import Client from './client';
 import Cache from './cache';
 
-export default class Horn {
+export default class Socketbox {
   static socketServerRef: Object;
 
   static createServer ( socketServer: Object ) {

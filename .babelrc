@@ -3,6 +3,7 @@
   "plugins": [["transform-runtime", {
     "moduleName": "babel-runtime"
   }],
-  "@babel/plugin-transform-flow-strip-types"
+  "@babel/plugin-transform-flow-strip-types",
+  "babel-plugin-add-module-exports"
   ]
 }

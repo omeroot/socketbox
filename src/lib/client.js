@@ -35,15 +35,14 @@ export default class Client {
     this.socket.send( raw );
   }
 
-  request ( body: Object, atStarted: number ) {
-    const urlDelegate = URLparse( body.url );
-    const urlObject = new URL( body.url );
+  request ( messageObject: Object, atStarted: number ) {
+    const urlDelegate = URLparse( messageObject.url );
+    const urlObject = new URL( messageObject.url );
 
     let obj = Object.assign( {}, this.req );
     obj = Object.assign( obj, urlDelegate );
 
-    obj.body = body;
-    obj.url = body.url;
+    obj.body = messageObject.body;
     obj.query = {};
     obj.params = {};
     obj.at_started = atStarted;

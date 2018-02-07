@@ -1,7 +1,7 @@
 import WebSocket from 'ws';
-import Horn from './../src'
+import Socketbox from './../src'
 
-describe('Horn', () => {
+describe('Socketbox', () => {
   let wss = null;
   
   before(() => {
@@ -9,18 +9,18 @@ describe('Horn', () => {
     console.debug('Websocket listen=[8080]');
   });
 
-  describe( 'Horn app instance', () => {
-    it( 'create horn app with ws', ( done ) => {
-      const app = Horn.createServer(wss);
+  describe( 'Socketbox app instance', () => {
+    it( 'create socketbox app with ws', ( done ) => {
+      const app = Socketbox.createServer(wss);
       done();
     } );
   } );
   
-  describe('Horn router', () => {
+  describe('Socketbox router', () => {
     let router = null;
   
     it('create router', (done) => {
-      router = new Horn.Router();
+      router = new Socketbox.Router();
       done();
     });
   
@@ -30,7 +30,7 @@ describe('Horn', () => {
     });
   });
   
-  describe('Horn request', () => {
+  describe('Socketbox request', () => {
     let wssClient = null;
   
     before(() => {
@@ -48,7 +48,7 @@ describe('Horn', () => {
     })
   })
   
-  describe( 'Horn client', () => {
+  describe( 'Socketbox client', () => {
     let wssClient = null;
   
     before(() => {
