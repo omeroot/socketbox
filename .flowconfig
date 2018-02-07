@@ -13,3 +13,6 @@
 esproposal.decorators=ignore
 
 [strict]
+declare module 'module' {
+  declare module.exports: any;
+}

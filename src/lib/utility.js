@@ -16,3 +16,25 @@ export const randomString   = ( _length ) => {
     .map( () => s.charAt( Math.floor( Math.random() * s.length ) ) )
     .join( '' );
 };
+
+export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
+  const resultArray  = [];
+
+  if ( !arr.length ) return approve( resultArray );
+
+  const next = ( index ) => {
+    if ( arr[ index ] ) {
+      arr[ index ]( req, res, next.bind( null, index + 1 ) );
+    }
+
+    approve();
+  };
+
+  try {
+    arr[ 0 ]( req, res, next.bind( null, 1 ) );
+  } catch ( error ) {
+    console.log( error );
+  }
+
+  return true;
+} );

@@ -1,28 +1,51 @@
 // @flow
+import pathToRegexp from 'path-to-regexp';
+import { sync } from './utility';
 
 export default class Router {
-  static instance = null;
-
   routePath: Array<string> = [];
   mapping: {[index: string]: Array<Function>} = {};
-
-  static constructor () {
-    if ( !Router.instance ) Router.instance = new Router();
-    return Router.instance;
-  }
+  prefix: string
+  prefixRegExp: RegExp;
 
   register ( path: string, ...args: Array<Function> ) {
-    if ( this.routePath.indexOf( path ) >= 0 ) throw Error( `Route already registered. [${path}]` );
+    if ( typeof path !== 'string' ) throw new Error( `path is invalid type. [${path}]` );
+    if ( this.routePath.indexOf( path ) >= 0 ) throw new Error( `Route already registered. [${path}]` );
+    if ( !args.length ) throw new Error( `Handle function is not defined path=[${path}]` );
 
-    const index: number = this.routePath.push( path );
+    path = path.toLowerCase();
+
+    const index: number = this.routePath.push( pathToRegexp( path ) ) - 1;
     this.mapping[ index.toString() ] = args;
 
     return true;
   }
 
-  callNextFunctions ( coming: any, req: any, res: any ) {
-    console.log( '>>>>>>', this );
-    const pointer = this.routePath.indexOf( coming.url );
-    console.log( pointer );
+  setPrefix ( prefix: string ) {
+    this.prefix = prefix;
+    this.prefixRegExp = new RegExp( `^${prefix}`, 'i' );
+  }
+
+  runAsyncRequestHandler ( handler: Array<Function>, req: any, res: any ) {
+    sync( handler, req, res );
+    return this;
+  }
+
+  callNextFunctions ( req: any, res: any ) {
+    const { pathname } = req;
+    let match: any = null;
+    let index: number = 0;
+
+    for ( let i  = 0; i < this.routePath.length; i += 1 ) {
+      match = this.routePath[ i ].exec( pathname );
+      index = i;
+      if ( match ) break;
+    }
+
+    if ( !match ) {
+      return res.send( { statusCode : 404 } );
+    }
+
+    return this.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
   }
 }

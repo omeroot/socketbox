@@ -7,7 +7,7 @@ const OutputBaseDirectory = path.join( __dirname, './dist' );
 const ResourcePath = path.resolve( __dirname, './src/' );
 
 const WEBPACK_CONFIG = {
-  entry  : './src/index.js',
+  entry  : './examples/index.js',
   output : {
     filename                      : 'app.js',
     path                          : OutputBaseDirectory,

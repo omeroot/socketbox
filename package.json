@@ -38,6 +38,7 @@
   "dependencies": {
     "eslint-config-airbnb": "^16.1.0",
     "flow-bin": "^0.64.0",
+    "path-to-regexp": "^2.1.0",
     "ws": "^4.0.0"
   }
 }
