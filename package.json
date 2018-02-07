@@ -8,7 +8,7 @@
     "build": "rm -rf dist/* && NODE_ENV=prod webpack",
     "build:dev": "rm -rf dist/* && NODE_ENV=dev webpack"
   },
-  "author": "demircanomer <demircanomer91@gmail.com>",
+  "author": "omer demircan <demircanomer91@gmail.com>",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.39",
@@ -40,5 +40,9 @@
   "dependencies": {
     "path-to-regexp": "^2.1.0",
     "ws": "^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/omeroot/socketbox"
   }
 }

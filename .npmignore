@@ -8,3 +8,8 @@ package-lock
 .git
 .npmrc
 npm-debug.log
+.flowconfig
+.eslintignore
+.eslintrc.json
+.editorconfig
+.babelrc
