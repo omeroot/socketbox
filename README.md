@@ -125,7 +125,7 @@ router.register( '/message/write/:userid', ( req, res ) => {
 ```
 ## Middleware
 You can add property to request object on middleware.
-```
+```js
 const mid1 = ( req, res, next ) => {
   req.user = {};
   req.user.username = 'dmomer';
