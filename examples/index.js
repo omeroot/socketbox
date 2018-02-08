@@ -1,18 +1,26 @@
 import WebSocket from 'ws';
 import Socketbox from './../dist/socketbox';
 
-const Socketbox1 = require( './../dist/socketbox' );
+const ws = new WebSocket.Server( { port : 8080, clientTracking : false } );
 
-console.log( Socketbox );
-console.log( Socketbox1 );
-
-const ws = new WebSocket.Server( { port : 8080 } );
-
-Socketbox.createServer( ws );
+const app = new Socketbox( {
+  ping        : true,
+  pingTimeout : 4 * 1000,
+} );
+app.createServer( ws );
 
 const router = Socketbox.Router();
+app.use( '/', router );
 
-Socketbox.use( '/', router );
+app.on( 'connected', ( client ) => {
+  console.log( `${client.ip} connected` );
+} );
+
+// this client clone of user client
+app.on( 'disconnect', ( client ) => {
+  console.log( `${client.ip} disconnected` );
+} );
+
 
 const mid1 = ( req, res, next ) => {
   req.user = {};
@@ -33,3 +41,9 @@ router.register( '/message/write', mid1, mid2, ( req, res ) => {
   console.log( 'User', req.user );
   res.send( { statusCode : 200 } );
 } );
+
+router.register( '/login', ( req, res ) => {
+  req.session.name = 'omer';
+  res.send( 'login is success!' );
+} );
+
