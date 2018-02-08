@@ -51,9 +51,9 @@ var wsClient = new WebSocket('ws://localhost:8080');
 
 // example Web browser websocket
 wsClient.onmessage = function(message){ 
-	if(message.data === 'ping') {
-		ws2.send('pong')
-	}
+  if(message.data === 'ping') {
+    ws2.send('pong')
+  }
 }
 ```
 
