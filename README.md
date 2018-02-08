@@ -1,5 +1,5 @@
-# Horn
-Horn is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
+# Socketbox
+Socketbox is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
 
 ```js
 import Socketbox from 'socketbox';
