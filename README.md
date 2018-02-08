@@ -1,3 +1,4 @@
+[![npm version](https://badge.fury.io/js/socketbox.svg)](https://badge.fury.io/js/socketbox)
 # Socketbox
 Socketbox is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
 
