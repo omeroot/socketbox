@@ -45,7 +45,7 @@ Events	 		 | Description
 
 ## Basic text message based ping-pong
 ##### Your client listen ping text message and reply to this message
-```
+```js
 // client connect to server
 var wsClient = new WebSocket('ws://localhost:8080');
 
