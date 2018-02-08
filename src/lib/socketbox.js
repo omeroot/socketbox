@@ -91,7 +91,7 @@ export default class Socketbox extends EventEmitter {
     let __prefix: string = '/';
 
     if ( !router ) {
-      __router = router;
+      __router = prefix;
     } else {
       __prefix = prefix;
       __router = router;

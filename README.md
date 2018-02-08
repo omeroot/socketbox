@@ -73,13 +73,16 @@ Events	 		 | Description
 ##### Event callback give one parameter, it is client object.
 
 ## Client sessions
-##### Your each client have own session object.You can edit session add and remove directly.
+Your each client have own session object.You can edit session add and remove directly.
 You can write data to client session.
-Unfortunately, you can just access to client object on connected event.Coming soon everywhere:)
 ```js
-app.on('connected', (client) => {
-  client.session.at_time = new Date();
-});
+// example:
+// you validate client and returned user object.You
+// can put user to client session.You can access session in each request 
+// session everytime stored until client disconnect
+router.register( '/validate/token', ( req, res ) => {
+  req.session.user = validate(req.body.token); //use session.user on each request
+} );
 ```
 
 ## Socket message protocol
