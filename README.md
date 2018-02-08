@@ -1,3 +1,4 @@
+
 [![npm version](https://badge.fury.io/js/socketbox.svg)](https://badge.fury.io/js/socketbox)
 # Socketbox
 Socketbox is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
@@ -136,6 +137,36 @@ router.register( '/profile', mid1, ( req, res ) => {
 } );
 ```
 
+## Channels
+You can bind clients to channels.You can send message to channel if you want.
+
+#### Join to channel
+**Method: join( cname )**
+
+ - cname `<String>` channel name for join
+
+```js
+// if channel is not exist, method create channel.
+client.join('channel1');
+
+// ex:
+// you can listen join router
+router.regiseter('/join?room=223', (req, res) => {
+  res.join(req.query.room);
+});
+```
+
+#### Send message to channel
+**Method: sendTo(message, cname)**
+
+ - message `<String>` message content
+ - cname    `<String>` channel name to go
+
+```js
+res.sendTo({message: x}, 'channel1');
+```
+
+
 ## Request
 You can use some request properties.
 ```js
@@ -160,6 +191,7 @@ req.query; // 'query=string'
 req.hash; // #hash
 ```
 ## Response
+##### Actually response object is client reference.
 You can put string, json or buffer to message.
 ```js
 res.send(JSON.stringify({name: 'omer'}));

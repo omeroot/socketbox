@@ -3,6 +3,7 @@ import { parse as URLparse, URL } from 'url';
 import crypto from 'crypto';
 import Route from './route';
 import Cache from './cache';
+import Channel from './channel';
 
 export default class Client {
   __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
@@ -13,6 +14,7 @@ export default class Client {
   socket: Object;
   req: Object;
   isAlive: Boolean;
+  reference: Symbol;
 
   constructor ( socket: any, req: any ) {
     this.ip = req.connection.remoteAddress;
@@ -21,6 +23,7 @@ export default class Client {
     this.socket = socket;
     this.req = req;
     this.isAlive = true;
+    this.reference = Symbol( this.__uid__ );
 
     /**
      * listen client messages
@@ -28,7 +31,11 @@ export default class Client {
     this.listen();
   }
 
-  send ( message: any ) {
+  join ( cname: string ) {
+    Channel.join( cname, this );
+  }
+
+  static serializeMessage ( message: any ) {
     let raw = '';
 
     if ( typeof message === 'object' ) {
@@ -37,8 +44,16 @@ export default class Client {
       raw = message || '';
     }
 
+    return raw;
+  }
+
+  sendTo ( message: any, cname: string ) {
+    Channel.publish( this.constructor.serializeMessage( message ), cname );
+  }
+
+  send ( message: any ) {
     try {
-      this.socket.send( raw );
+      this.socket.send( this.constructor.serializeMessage( message ) );
     } catch ( error ) { /* error */ }
   }
 

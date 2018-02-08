@@ -4,7 +4,7 @@ import Socketbox from './../dist/socketbox';
 const ws = new WebSocket.Server( { port : 8080, clientTracking : false } );
 
 const app = new Socketbox( {
-  ping        : true,
+  ping        : false,
   pingTimeout : 4 * 1000,
 } );
 app.createServer( ws );
@@ -45,5 +45,16 @@ router.register( '/message/write', mid1, mid2, ( req, res ) => {
 router.register( '/login', ( req, res ) => {
   req.session.name = 'omer';
   res.send( 'login is success!' );
+} );
+
+router.register( '/join', ( req, res ) => {
+  const { cname } = req.body;
+  res.join( cname );
+
+  return res.send( { statusCode : 200 } );
+} );
+
+router.register( '/send/channel', ( req, res ) => {
+  res.sendTo( req.body.message, req.body.cname );
 } );
 
