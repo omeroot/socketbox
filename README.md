@@ -74,11 +74,11 @@ Events	 		 | Description
 
 ## Client sessions
 ##### Your each client have own session object.You can edit session add and remove directly.
-Example your middleware validate user request and save validated data to client session.
+You can write data to client session.
 Unfortunately, you can just access to client object on connected event.Coming soon everywhere:)
 ```js
 app.on('connected', (client) => {
-  client.session.
+  client.session.at_time = new Date();
 });
 ```
 
