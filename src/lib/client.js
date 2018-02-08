@@ -2,20 +2,25 @@
 import { parse as URLparse, URL } from 'url';
 import crypto from 'crypto';
 import Route from './route';
+import Cache from './cache';
 
 export default class Client {
+  __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
+
   ip: string;
   atConnected: Date;
   session: Object;
   socket: Object;
   req: Object;
+  isAlive: Boolean;
 
   constructor ( socket: any, req: any ) {
     this.ip = req.connection.remoteAddress;
     this.atConnected = new Date();
-    this.session = { _id : crypto.randomBytes( 12 ).toString( 'hex' ) };
+    this.session = {};
     this.socket = socket;
     this.req = req;
+    this.isAlive = true;
 
     /**
      * listen client messages
@@ -29,10 +34,12 @@ export default class Client {
     if ( typeof message === 'object' ) {
       raw = JSON.stringify( message );
     } else {
-      raw = message;
+      raw = message || '';
     }
 
-    this.socket.send( raw );
+    try {
+      this.socket.send( raw );
+    } catch ( error ) { /* error */ }
   }
 
   request ( messageObject: Object, atStarted: number ) {
@@ -47,6 +54,9 @@ export default class Client {
     obj.params = {};
     obj.at_started = atStarted;
 
+    // reference client session to each request
+    obj.session = this.session;
+
     urlObject.searchParams.forEach( ( value, name ) => {
       obj.query[ name ] = value;
     } );
@@ -56,19 +66,61 @@ export default class Client {
 
   handle ( message: string ) {
     try {
+      if ( message === 'pong' ) return this.heartbeat();
+
       const atStarted = Date.now();
       const json = JSON.parse( message );
 
       if ( !json.url || !json.url.length ) throw Error( 'url is not defined' );
 
-      Route.routeTo( this.request( json, atStarted ), this );
+      return Route.routeTo( this.request( json, atStarted ), this );
     } catch ( error ) {
-      console.log( error );
-      this.send( { err : true } );
+      return this.send( { statusCode : 401, message : error.message } );
     }
+  }
+
+  heartbeat () {
+    this.isAlive = true;
+  }
+
+  setIsAlive ( val: Boolean ) {
+    this.isAlive = val;
+  }
+
+  getIsAlive (): Boolean {
+    return this.isAlive;
+  }
+
+  terminate (): Boolean {
+    this.socket.terminate();
+  }
+
+  ping (): Boolean {
+    try {
+      this.send( 'ping' );
+    } catch ( error ) { console.log( error ); return false; }
+
+    return true;
+  }
+
+  // interface
+  noop () {
+    return this;
+  }
+
+  handleError ( error ) {
+    console.log( `Error: ${error} - ${this.ip}` );
+    Cache.removeClient( this.__uid__ );
+  }
+
+  handleClose () {
+    console.log( `Closed: - ${this.ip}` );
+    Cache.removeClient( this.__uid__ );
   }
 
   listen () {
     this.socket.on( 'message', this.handle.bind( this ) );
+    this.socket.on( 'error', this.handleError.bind( this ) );
+    this.socket.on( 'close', this.handleClose.bind( this ) );
   }
 }

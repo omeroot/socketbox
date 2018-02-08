@@ -8,13 +8,15 @@ import Socketbox from 'socketbox';
 const ws = new WebSocket.Server( { port : 8080 } );
 
 // you give socket server instance to socketbox
-Socketbox.createServer( ws );
+const app = new Socketbox();
+
+app.createServer( ws );
 
 //you create router
 const router = Socketbox.Router();
 
 //you activate router on this websocket server.
-Socketbox.use( '/', router );
+app.use( '/', router );
 ```
 
 ## Installation
@@ -30,6 +32,45 @@ $ npm install socketbox
 
 ## Supported socket types
  * Websocket
+
+## Socketbox opts
+```js
+const app = new Socketbox(opts);
+```
+
+Events	 		 | Description
+-----------------|------------
+`ping`	    	 | (boolean) ping-pong activate, server send ping message automatic
+`pingTimeout`    | (number) seconds, ping sending timeout
+
+## Basic text message based ping-pong
+##### Your client listen ping text message and reply to this message
+```
+// client connect to server
+var wsClient = new WebSocket('ws://localhost:8080');
+
+// example Web browser websocket
+wsClient.onmessage = function(message){ 
+	if(message.data === 'ping') {
+		ws2.send('pong')
+	}
+}
+```
+
+##### If your client dont reply ping message, server know client is down and clear client data on system.
+
+## Socketbox client events
+```js
+app.on(<events>, (client) => {
+  console.log(`${client.ip} is connected`);
+});
+```
+Events	 		 | Description
+-----------------|------------
+`connected`    	 | Emitted client connected
+`disconnected`   | Emitted client disconnected
+
+##### Event callback give one parameter, it is client object.
 
 ## Socket message protocol
 You need to adjust some rules while send message to this socket server from client. Your socket message architecture below;
@@ -49,7 +90,7 @@ Property | Description
 `url`    | ( required ) your defined url on backend server
 `body`   | ( optional ) if you want put data to your message
 
-you can put query your url.
+##### you can put query your url.
 ```js
 {
   url: '/message/get?messageId=11993'
