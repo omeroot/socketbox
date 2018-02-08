@@ -72,6 +72,16 @@ Events	 		 | Description
 
 ##### Event callback give one parameter, it is client object.
 
+## Client sessions
+##### Your each client have own session object.You can edit session add and remove directly.
+Example your middleware validate user request and save validated data to client session.
+Unfortunately, you can just access to client object on connected event.Coming soon everywhere:)
+```js
+app.on('connected', (client) => {
+  client.session.
+});
+```
+
 ## Socket message protocol
 You need to adjust some rules while send message to this socket server from client. Your socket message architecture below;
 
