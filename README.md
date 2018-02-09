@@ -46,9 +46,10 @@ Events	 		 | Description
 
 ## Basic text message based ping-pong
 ##### Your client listen ping text message and reply to this message
+##### !! Strongly recommend set clientTracking to false in websocket opts
 ```js
 // client connect to server
-var wsClient = new WebSocket('ws://localhost:8080');
+var wsClient = new WebSocket('ws://localhost:8080', opts);
 
 // example Web browser websocket
 wsClient.onmessage = function(message){ 
