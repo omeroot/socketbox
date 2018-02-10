@@ -1,6 +1,7 @@
 
 [![npm version](https://badge.fury.io/js/socketbox.svg)](https://badge.fury.io/js/socketbox)
 [![Build Status](https://travis-ci.org/omeroot/socketbox.svg?branch=master)](https://travis-ci.org/omeroot/socketbox)
+[![Coverage Status](https://coveralls.io/repos/github/omeroot/socketbox/badge.svg?branch=master)](https://coveralls.io/github/omeroot/socketbox?branch=master)
 # Socketbox
 Socketbox is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
 
@@ -26,7 +27,7 @@ This is a [Node.js](https://nodejs.org/en/) module available through the
 [npm registry](https://www.npmjs.com/).
 
 Before installing, [download and install Node.js](https://nodejs.org/en/download/).
-Node.js 8 or higher is required.
+Node.js 7 or higher is required.
 
 ```bash
 $ npm install socketbox
