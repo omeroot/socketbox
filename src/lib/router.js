@@ -1,21 +1,49 @@
 // @flow
 import pathToRegexp from 'path-to-regexp';
+import __path from 'path';
 import { sync } from './utility';
 
 export default class Router {
+  /**
+   * Used for check url in each request,
+   * match regex in this array.
+   */
+  routePathRegex: Array<RegExp> = [];
+
+  /**
+   * for check already registered raw path string
+   */
   routePath: Array<string> = [];
+
+  /**
+   * router path handle functions map
+   * index is position in routePathIndex of path
+   */
   mapping: {[index: string]: Array<Function>} = {};
+
+  /**
+   * Router default prefix and prefix regex.
+   */
   prefix: string
   prefixRegExp: RegExp;
 
+  constructor ( prefix: string ) {
+    this.setPrefix( ( prefix && prefix.length ) ? prefix : '/' );
+  }
+
   register ( path: string, ...args: Array<Function> ) {
     if ( typeof path !== 'string' ) throw new Error( `path is invalid type. [${path}]` );
-    if ( this.routePath.indexOf( path ) >= 0 ) throw new Error( `Route already registered. [${path}]` );
     if ( !args.length ) throw new Error( `Handle function is not defined path=[${path}]` );
 
-    path = path.toLowerCase();
+    path = __path.join( this.prefix, path.toLowerCase() );
 
-    const index: number = this.routePath.push( pathToRegexp( path ) ) - 1;
+    const pathIsRegexed = pathToRegexp( path );
+
+    if ( this.routePath.indexOf( path ) >= 0 ) throw new Error( `Route already registered. [${path}]` );
+
+    const index: number = this.routePathRegex.push( pathIsRegexed ) - 1;
+
+    this.routePath.push( path );
     this.mapping[ index.toString() ] = args;
 
     return true;
@@ -26,26 +54,32 @@ export default class Router {
     this.prefixRegExp = new RegExp( `^${prefix}`, 'i' );
   }
 
-  runAsyncRequestHandler ( handler: Array<Function>, req: any, res: any ) {
-    sync( handler, req, res );
-    return this;
+  static runAsyncRequestHandler ( handler: Array<Function>, req: any, res: any ) {
+    return sync( handler, req, res );
   }
 
-  callNextFunctions ( req: any, res: any ) {
-    const { pathname } = req;
+  findAndGetPathInMap ( pathnameOnReq ) {
     let match: any = null;
     let index: number = 0;
 
-    for ( let i  = 0; i < this.routePath.length; i += 1 ) {
-      match = this.routePath[ i ].exec( pathname );
+    for ( let i  = 0; i < this.routePathRegex.length; i += 1 ) {
+      match = this.routePathRegex[ i ].exec( pathnameOnReq );
       index = i;
       if ( match ) break;
     }
 
+    return { match, index };
+  }
+
+  callNextFunctions ( req: any, res: any ) {
+    const { pathname } = req;
+    const { match, index } = this.findAndGetPathInMap( pathname );
+
     if ( !match ) {
-      return res.send( { statusCode : 404 } );
+      res.send( { statusCode : 404 } );
+      return;
     }
 
-    return this.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
+    this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
   }
 }

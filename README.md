@@ -1,5 +1,6 @@
 
 [![npm version](https://badge.fury.io/js/socketbox.svg)](https://badge.fury.io/js/socketbox)
+[![Build Status](https://travis-ci.org/omeroot/socketbox.svg?branch=master)](https://travis-ci.org/omeroot/socketbox)
 # Socketbox
 Socketbox is real time socket layer framework inspired by express.You can simulate socket messages like as restful request, build router system according to a specific protocol and write middleware to this routers.
 
@@ -186,6 +187,7 @@ req.host; //omer.com
 req.hostname; //omer.com
 req.port; // null
 req.path; // /p/a/t/h?query=string
+req.pathname // /p/a/t/h
 req.href; // wss://omer.com/p/a/t/h?query=string#hash
 req.query; // 'query=string'
 req.hash; // #hash

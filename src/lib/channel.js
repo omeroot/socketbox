@@ -3,6 +3,7 @@ export default class Channel {
   static channels: Object = {};
 
   static createChannel ( cname: string ) {
+    if ( this.channels[ cname ] ) throw new Error( 'Channel already registered' );
     this.channels[ cname ] = [];
   }
 
@@ -20,7 +21,8 @@ export default class Channel {
       }
     }
 
-    if ( !found ) this.channels[ cname ].push( client );
+    if ( !found ) return this.channels[ cname ].push( client );
+    return false;
   }
 
   static publish ( message: string, cname: string ) {

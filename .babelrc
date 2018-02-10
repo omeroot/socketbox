@@ -5,5 +5,8 @@
   }],
   "@babel/plugin-transform-flow-strip-types",
   "babel-plugin-add-module-exports"
-  ]
+  ],
+  "env": {
+    "test": ["istanbul"]
+  }
 }

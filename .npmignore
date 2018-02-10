@@ -13,3 +13,7 @@ npm-debug.log
 .eslintrc.json
 .editorconfig
 .babelrc
+.nyc_output
+coverage
+.vscode
+examples

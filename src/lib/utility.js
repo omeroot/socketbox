@@ -17,7 +17,7 @@ export const randomString   = ( _length ) => {
     .join( '' );
 };
 
-export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
+export const sync = ( arr, req, res ) => new Promise( ( approve ) => {
   const resultArray  = [];
 
   if ( !arr.length ) return approve( resultArray );

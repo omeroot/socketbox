@@ -30,6 +30,10 @@ export default class Socketbox extends EventEmitter {
 
     this.boxoptions = Object.assign( this.boxoptions, options );
 
+    if ( this.boxoptions.ping ) {
+      if ( typeof this.boxoptions.pingTimeout !== 'number' ) { throw new TypeError( 'pingTimeout type must be number' ); }
+    }
+
     // check which sockets dont response our ping message
     if ( this.boxoptions.ping ) { setInterval( this[ checkAliveSockets ].bind( this ), this.boxoptions.pingTimeout ); }
   }
@@ -89,6 +93,10 @@ export default class Socketbox extends EventEmitter {
   use ( prefix: string, router: Object ) {
     let __router: Object = {};
     let __prefix: string = '/';
+
+    if ( !prefix ) {
+      return false;
+    }
 
     if ( !router ) {
       __router = prefix;

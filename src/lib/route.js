@@ -8,7 +8,7 @@ export default class Route {
     let targetRouter: ?_Router = null;
 
     for ( let i = 0; i < this.routerArray.length; i += 1 ) {
-      if ( this.routerArray[ i ].prefixRegExp.test( req.path ) ) {
+      if ( this.routerArray[ i ].prefixRegExp.test( req.pathname ) ) {
         targetRouter = this.routerArray[ i ];
         break;
       }

@@ -32,7 +32,7 @@ export default class Client {
   }
 
   join ( cname: string ) {
-    Channel.join( cname, this );
+    return Channel.join( cname, this );
   }
 
   static serializeMessage ( message: any ) {
@@ -129,7 +129,6 @@ export default class Client {
   }
 
   handleClose () {
-    console.log( `Closed: - ${this.ip}` );
     Cache.removeClient( this.__uid__ );
   }
 
