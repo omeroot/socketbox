@@ -39,11 +39,11 @@
     "nyc": "^11.4.1",
     "webpack": "^3.10.0",
     "webpack-bundle-analyzer": "^2.9.2",
-    "webpack-node-externals": "^1.6.0"
+    "webpack-node-externals": "^1.6.0",
+    "ws": "^4.0.0"
   },
   "dependencies": {
-    "path-to-regexp": "^2.1.0",
-    "ws": "^4.0.0"
+    "path-to-regexp": "^2.1.0"
   },
   "repository": {
     "type": "git",
