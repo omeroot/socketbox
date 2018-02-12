@@ -64,6 +64,7 @@ export default class Client {
     let obj = Object.assign( {}, this.req );
     obj = Object.assign( obj, urlDelegate );
 
+    obj.headers = Object.assign( {}, messageObject, { body : undefined } );
     obj.body = messageObject.body;
     obj.query = {};
     obj.params = {};
