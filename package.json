@@ -8,7 +8,7 @@
     "cov": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha test/**/*.js",
     "build": "rm -rf dist/* && NODE_ENV=prod webpack",
     "build:dev": "rm -rf dist/* && NODE_ENV=dev webpack",
-    "report": "node_modules/.bin/nyc report --reporter=html"
+    "report": "node_modules/.bin/nyc report --reporter=lcov"
   },
   "author": "omer demircan <demircanomer91@gmail.com>",
   "license": "MIT",
