@@ -89,12 +89,12 @@ router.register( '/validate/token', ( req, res ) => {
 } );
 ```
 
-## Socket message protocol
+## Socket message protocol (Client message format)
 You need to adjust some rules while send message to this socket server from client. Your socket message architecture below;
 
 ```js
 {
-  url: 'ws://omer.com/message/write',
+  url: 'ws://omer.com/message/write', // hostname and protocol is required current version
   body: {
     to: 'x',
     from: 'y',
@@ -110,7 +110,7 @@ Property | Description
 ##### you can put query your url.
 ```js
 {
-  url: '/message/get?messageId=11993'
+  url: 'ws://omer.com/message/get?messageId=11993'
 }
 ```
 
@@ -120,9 +120,17 @@ router.register( '/message/write', ( req, res ) => {
   res.send( { statusCode : 200 } );
 } );
 ```
-you can use query and params while register route path.
+you can use params while register route path.
 ```js
 router.register( '/message/write/:userid', ( req, res ) => {
+  /**
+   * Access to params
+   * req.params.userid
+   * 
+   * If you have query in request;
+   * req.query.[<your query name>]
+   */
+  
   res.send( { statusCode : 200 } );
 } );
 ```
@@ -154,7 +162,7 @@ client.join('channel1');
 
 // ex:
 // you can listen join router
-router.regiseter('/join?room=223', (req, res) => {
+router.register('/join?room=223', (req, res) => {
   res.join(req.query.room);
 });
 ```
