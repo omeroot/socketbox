@@ -15,6 +15,7 @@ export default class Client {
   req: Object;
   isAlive: Boolean;
   reference: Symbol;
+  rooms: Array<string>;
 
   constructor ( socket: any, req: any ) {
     this.ip = req.connection.remoteAddress;
@@ -24,6 +25,7 @@ export default class Client {
     this.req = req;
     this.isAlive = true;
     this.reference = Symbol( this.__uid__ );
+    this.rooms = [];
 
     /**
      * listen client messages
@@ -31,7 +33,24 @@ export default class Client {
     this.listen();
   }
 
+  /**
+   * Add rooms to client joined room array.
+   * We gonna use this rooms for leave from room,
+   * If user is disconnected.
+   *
+   * @param {string} cname
+   * @returns {number}
+   * @memberof Client
+   */
+  addRoomToJoinedRoom ( cname: string ): number {
+    let index = this.rooms.indexOf( cname );
+
+    if ( index < 0 ) index = this.rooms.push( cname ) - 1;
+    return index;
+  }
+
   join ( cname: string ) {
+    this.addRoomToJoinedRoom( cname );
     return Channel.join( cname, this );
   }
 
@@ -127,10 +146,12 @@ export default class Client {
   handleError ( error ) {
     console.log( `Error: ${error} - ${this.ip}` );
     Cache.removeClient( this.__uid__ );
+    Channel.leaveRooms( this.__uid__, this.rooms );
   }
 
   handleClose () {
     Cache.removeClient( this.__uid__ );
+    Channel.leaveRooms( this.__uid__, this.rooms );
   }
 
   listen () {

@@ -34,4 +34,28 @@ export default class Channel {
 
     return false;
   }
+
+  /**
+   * splice disconnected clients from all joined rooms
+   *
+   * @static
+   * @param {string} uuid
+   * @param {Array<String>} roomNamesArray
+   * @returns {number}
+   * @memberof Channel
+   */
+  static leaveRooms ( uuid: string, roomNamesArray: Array<String> ): number {
+    let leavedRoomCounter = 0;
+
+    for ( let i = 0; i < roomNamesArray.length; i += 1 ) {
+      const pos = this.channels[ roomNamesArray ].map( item => item.__uid__ ).indexOf( uuid );
+
+      if ( pos < 0 ) continue;
+
+      this.channels[ roomNamesArray ].splice( pos, 1 );
+      leavedRoomCounter += 1;
+    }
+
+    return leavedRoomCounter;
+  }
 }
