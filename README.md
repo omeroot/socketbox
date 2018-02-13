@@ -177,6 +177,7 @@ router.register('/join?room=223', (req, res) => {
 res.sendTo({message: x}, 'channel1');
 ```
 
+#### Leave from channel
 
 ## Request
 You can use some request properties.
@@ -209,4 +210,17 @@ You can put string, json or buffer to message.
 res.send(JSON.stringify({name: 'omer'}));
 
 res.send(new Buffer('omer'));
+```
+
+### Leave from room
+**Method: leave( cname )**
+
+ - cname `<String>` channel name for leave
+
+If client is leaved, return true otherwise return false.
+
+```js
+// res is client reference on all request, you can access to client object using res.
+
+res.leave('room1');
 ```

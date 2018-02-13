@@ -36,6 +36,25 @@ export default class Channel {
   }
 
   /**
+   * Splice given client with this uuid from given room with cname
+   * If client joined this room, return true otherwise return false;
+   *
+   * @static
+   * @param {string} cname
+   * @param {string} uuid
+   * @returns {boolean}
+   * @memberof Channel
+   */
+  static spliceClientFromRoom ( cname: string, uuid: string ): boolean {
+    const pos = this.channels[ cname ].map( item => item.__uid__ ).indexOf( uuid );
+
+    if ( pos < 0 ) return false;
+
+    this.channels[ cname ].splice( pos, 1 );
+    return true;
+  }
+
+  /**
    * splice disconnected clients from all joined rooms
    *
    * @static
@@ -48,12 +67,8 @@ export default class Channel {
     let leavedRoomCounter = 0;
 
     for ( let i = 0; i < roomNamesArray.length; i += 1 ) {
-      const pos = this.channels[ roomNamesArray ].map( item => item.__uid__ ).indexOf( uuid );
-
-      if ( pos < 0 ) continue;
-
-      this.channels[ roomNamesArray ].splice( pos, 1 );
-      leavedRoomCounter += 1;
+      const success = this.spliceClientFromRoom( roomNamesArray[ i ], uuid );
+      if ( success ) leavedRoomCounter += 1;
     }
 
     return leavedRoomCounter;

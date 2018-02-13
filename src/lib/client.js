@@ -33,6 +33,7 @@ export default class Client {
     this.listen();
   }
 
+  // TODO: make private
   /**
    * Add rooms to client joined room array.
    * We gonna use this rooms for leave from room,
@@ -64,6 +65,16 @@ export default class Client {
     }
 
     return raw;
+  }
+
+  leave ( cname ) {
+    const index = this.rooms.indexOf( cname );
+
+    if ( index < 0 ) return false;
+    this.rooms.splice( index, 1 );
+    Channel.spliceClientFromRoom( cname, this.__uid__ );
+
+    return true;
   }
 
   sendTo ( message: any, cname: string ) {
