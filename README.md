@@ -24,7 +24,7 @@ app.use( '/', router );
 
 ## Installation
 This is a [Node.js](https://nodejs.org/en/) module available through the
-[npm registry](https://www.npmjs.com/).
+[npm registry](https://www.npmjs.com/package/socketbox).
 
 Before installing, [download and install Node.js](https://nodejs.org/en/download/).
 Node.js 7 or higher is required.
