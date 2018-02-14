@@ -2,26 +2,34 @@
 import Client from './client';
 
 export default class Cache {
-  static clientsArray: Array<Client> = [];
+  static clientsMap: Map<string, Client> = new Map();
 
-  static push ( client: Client ) {
-    this.clientsArray.push( client );
+  static sPush ( key: string, client: Client ) {
+    this.clientsMap.set( key, client );
+  }
+
+  static sGet ( key: string ): Client {
+    return this.clientsMap.get( key );
   }
 
   static clients (): Array<Client> {
-    return this.clientsArray;
+    return Array.from( this.clientsMap ).map( item => item[ 1 ] );
   }
 
-  static removeClientByIndex ( index: int ) {
-    this.clientsArray.splice( index, 1 );
-  }
+  static filter ( key: string | Function ): Array<Client> {
+    if ( !key ) return [];
+    let _filter;
 
-  static removeClient ( uid: string ) {
-    for ( let i = 0; i < this.clientsArray.length; i += 1 ) {
-      if ( this.clientsArray[ i ].__uid__ === uid ) {
-        this.clientsArray.splice( i, 1 );
-        break;
-      }
+    if ( typeof key === 'function' ) {
+      _filter = key;
+    } else {
+      _filter = item => item[ 0 ] === key;
     }
+
+    return [...this.clientsMap].filter( _filter ).map( item => item[ 1 ] );
+  }
+
+  static clearClient ( uuid: string ) {
+    this.clientsMap.delete( uuid );
   }
 }

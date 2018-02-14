@@ -1,4 +1,5 @@
 // @flow
+/* eslint no-restricted-syntax: 0 */
 import { EventEmitter } from 'events';
 import _Router from './router';
 import Route from './route';
@@ -39,10 +40,9 @@ export default class Socketbox extends EventEmitter {
   }
 
   [checkAliveSockets] () {
-    for ( let j = 0; j < Cache.clientsArray.length; j += 1 ) {
-      const client = Cache.clientsArray[ j ];
+    for ( const client of Cache.clientsMap() ) {
       if ( !client.getIsAlive() ) {
-        this[ onClientIsDead ]( client, j );
+        this[ onClientIsDead ]( client );
         return;
       }
 
@@ -50,14 +50,14 @@ export default class Socketbox extends EventEmitter {
 
       const delivered = client.ping();
       if ( !delivered ) {
-        this[ onClientIsDead ]( client, j );
+        this[ onClientIsDead ]( client );
       }
     }
   }
 
-  [onClientIsDead] ( client, index ) {
+  [onClientIsDead] ( client ) {
     this.emit( 'disconnected', Object.assign( {}, client ) );
-    this.destroyClient( index, client );
+    this.destroyClient( client );
   }
 
   createServer ( socketServer: Object ) {
@@ -70,9 +70,9 @@ export default class Socketbox extends EventEmitter {
     return this;
   }
 
-  destroyClient ( cacheIndex, client ) {
+  destroyClient ( client ) {
     client.terminate();
-    Cache.removeClientByIndex( cacheIndex );
+    Cache.clearClient( client.__uid__ );
 
     return this;
   }
@@ -80,7 +80,7 @@ export default class Socketbox extends EventEmitter {
   onConnected ( socket: any, req: any ) {
     const newClient = new Client( socket, req );
 
-    Cache.push( newClient );
+    Cache.sPush( newClient.__uid__, newClient );
     this.emit( 'connected', newClient );
 
     return newClient;
@@ -88,6 +88,10 @@ export default class Socketbox extends EventEmitter {
 
   static Router () {
     return new _Router();
+  }
+
+  static Cache () {
+    return Cache;
   }
 
   use ( prefix: string, router: Object ) {

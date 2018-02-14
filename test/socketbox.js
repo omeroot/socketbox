@@ -1,10 +1,10 @@
 import assert from 'assert';
-import net from 'net';
 import WebSocket from 'ws';
 
 import Socketbox from './../src'
 import Router from './../src/lib/router';
 import Client from './../src/lib/client';
+import Cache from './../src/lib/cache';
 
 describe('Socketbox app', () => {
   describe('Socketbox with options', () => {
@@ -29,6 +29,21 @@ describe('Socketbox app', () => {
       const r = Socketbox.Router();
 
       assert(r instanceof Router);
+      done();
+    });
+
+    it('Get cache', (done) => {
+      const c1 = Socketbox.Cache();
+      const c2 = Socketbox.Cache();
+
+      assert.deepEqual(c1, Cache);
+      assert.deepEqual(c2, Cache);
+
+      const client = { __uid__ : '111'};
+      
+      c1.sPush('1', client);
+      assert.deepEqual(c2.sGet('1'), client);
+
       done();
     });
 

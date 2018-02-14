@@ -148,6 +148,41 @@ router.register( '/profile', mid1, ( req, res ) => {
 } );
 ```
 
+## Cache
+You can access socketbox cache but recommend only use the following methods.
+Cache class is static class and read-only.Clients is stored in a Map object.
+
+```js
+
+// return everytime same cache class.
+const cache = Socketbox.Cache();
+```
+**Method: cache.clients()**
+
+ - Returns: All clients in a Array.
+
+don't take parameters.
+
+**Method: cache.filter(key)**
+ - key `<string> | <Function>` You will be passed to key string or direct working filter function.
+ - Returns: All clients in a Array.
+
+Following is two differenct parameter example:
+```js
+
+// we have map , which is [['1', {name: 'omer'}], ['2', {name: 'demircan'}]]
+
+// use string key
+cache.filter('1'); // return only values [{name: 'omer'}]
+
+// use own filter function;
+// following function filter objects, which contains name key is 'omer'
+cache.filter((item) => {
+  // item[1] is value.
+  return item[1].name === 'demircan'
+}) // return [{name: 'demircan'}];
+```
+
 ## Channels
 You can bind clients to channels.You can send message to channel if you want.
 

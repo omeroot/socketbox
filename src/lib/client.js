@@ -14,7 +14,6 @@ export default class Client {
   socket: Object;
   req: Object;
   isAlive: Boolean;
-  reference: Symbol;
   rooms: Array<string>;
 
   constructor ( socket: any, req: any ) {
@@ -24,7 +23,6 @@ export default class Client {
     this.socket = socket;
     this.req = req;
     this.isAlive = true;
-    this.reference = Symbol( this.__uid__ );
     this.rooms = [];
 
     /**
@@ -156,12 +154,12 @@ export default class Client {
 
   handleError ( error ) {
     console.log( `Error: ${error} - ${this.ip}` );
-    Cache.removeClient( this.__uid__ );
+    Cache.clearClient( this.__uid__ );
     Channel.leaveRooms( this.__uid__, this.rooms );
   }
 
   handleClose () {
-    Cache.removeClient( this.__uid__ );
+    Cache.clearClient( this.__uid__ );
     Channel.leaveRooms( this.__uid__, this.rooms );
   }
 
