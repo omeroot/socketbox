@@ -40,8 +40,6 @@ describe('Cache', () => {
   it('Get clients method', (done) => {
     const clientsArr = Cache.clients();
 
-    console.log(clientsArr);
-
     assert(clientsArr.length === 2);
     assert(clientsArr[0].session.dbId === '00110011');
     assert(clientsArr[1].session.dbId === '00110012');
