@@ -1,7 +1,3 @@
-export function isPromise ( obj ) {
-  return !!obj && ( typeof obj === 'object' || typeof obj === 'function' ) && typeof obj.then === 'function';
-}
-
 export const randomString   = ( _length ) => {
   let length;
 
@@ -17,7 +13,7 @@ export const randomString   = ( _length ) => {
     .join( '' );
 };
 
-export const sync = ( arr, req, res ) => new Promise( ( approve ) => {
+export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   const resultArray  = [];
 
   if ( !arr.length ) return approve( resultArray );
@@ -33,7 +29,7 @@ export const sync = ( arr, req, res ) => new Promise( ( approve ) => {
   try {
     arr[ 0 ]( req, res, next.bind( null, 1 ) );
   } catch ( error ) {
-    console.log( error );
+    reject();
   }
 
   return true;

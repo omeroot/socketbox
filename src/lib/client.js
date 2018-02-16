@@ -59,7 +59,7 @@ export default class Client {
     if ( typeof message === 'object' ) {
       raw = JSON.stringify( message );
     } else {
-      raw = message || '';
+      raw = message.toString() || '';
     }
 
     return raw;

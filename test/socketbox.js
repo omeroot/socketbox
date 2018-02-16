@@ -1,5 +1,6 @@
 import assert from 'assert';
 import WebSocket from 'ws';
+import net from 'net';
 
 import Socketbox from './../src'
 import Router from './../src/lib/router';
@@ -60,6 +61,23 @@ describe('Socketbox app', () => {
       });
     });
 
+    it('destroyClient', (done) => {
+      Cache.clientsMap.clear();
+      var req = {connection: {remoteConnection: '::1'}};
+      var socket = net.Socket();
+      socket.terminate = () => {};
+
+      var app = new Socketbox();
+
+      app.on('connected', (client) => {
+        app.destroyClient(client);
+        assert(Cache.clients().length === 0);
+        done();
+      });
+
+      app.onConnected(socket, req)
+    })
+
     describe('use', (done) => {
       it('without params', (done) => {
         const app = new Socketbox();
@@ -67,12 +85,21 @@ describe('Socketbox app', () => {
         done();
       });
 
-      it('only router', (done) => {
+      it('one params is only router', (done) => {
         const app = new Socketbox();
         const r = new Socketbox.Router();
         app.use(r);
 
         assert(r.prefix === '/');
+        done();
+      });
+
+      it('full params route router & prefix', (done) => {
+        const app = new Socketbox();
+        const r = new Socketbox.Router();
+        app.use('/api/v1', r);
+
+        assert(r.prefix === '/api/v1');
         done();
       });
     })
