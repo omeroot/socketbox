@@ -76,7 +76,80 @@ describe('Socketbox app', () => {
       });
 
       app.onConnected(socket, req)
-    })
+    });
+
+    it('onClientIsDead', (done) => {
+      const app = new Socketbox();
+      const wss = new WebSocket.Server({port: 8081});
+      const scope = app.createServer(wss);
+      let client;
+      let __uid__;
+      let connection;
+
+      app.on('disconnected', (client) => {
+        assert(client.__uid__ === __uid__);
+        const c = Cache.sGet(__uid__);
+
+        assert(c === undefined);
+        wss.close(done);
+      });
+
+      app.on('connected', (client) => {
+        __uid__ = client.__uid__;
+        client = client;
+        const c = Cache.sGet(__uid__);
+
+        assert(c instanceof Client);
+        app.onClientIsDead(client);
+      });
+
+      wss.on('listening', () => {
+        connection = new WebSocket('ws://localhost:8081');
+      });
+    });
+
+    it('checkIsAlive', (done) => {
+      const app = new Socketbox({
+        ping: true,
+        pingTimeout: 1 * 1000
+      });
+      const wss = new WebSocket.Server({port: 8081});
+      const scope = app.createServer(wss);
+      let client;
+      let __uid__;
+      let connection;
+      let pingCounter = 0;
+
+      app.on('connected', (client) => {
+        __uid__ = client.__uid__;
+        client = client;
+        const c = Cache.sGet(__uid__);
+
+        assert(c instanceof Client);
+      });
+
+      app.on('disconnected', (client) => {
+        assert(client.__uid__ === __uid__);
+        const c = Cache.sGet(__uid__);
+
+        assert(c === undefined);
+        assert(pingCounter === 5);
+        wss.close(done);
+      });
+
+      wss.on('listening', () => {
+        connection = new WebSocket('ws://localhost:8081');
+
+        connection.onmessage = (evt) => {
+          assert(evt.data === 'ping');
+
+          if(pingCounter < 5){
+            connection.send('pong');
+            pingCounter += 1;
+          }
+        }
+      });
+    });
 
     describe('use', (done) => {
       it('without params', (done) => {

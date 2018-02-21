@@ -1,9 +1,11 @@
 // @flow
-import { parse as URLparse, URL } from 'url';
 import crypto from 'crypto';
 import Route from './route';
 import Cache from './cache';
 import Channel from './channel';
+import { PreRequest } from './types';
+
+// TODO: client disconnect without isAlive check
 
 export default class Client {
   __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
@@ -12,7 +14,6 @@ export default class Client {
   atConnected: Date;
   session: Object;
   socket: Object;
-  req: Object;
   isAlive: Boolean;
   rooms: Array<string>;
 
@@ -21,7 +22,6 @@ export default class Client {
     this.atConnected = new Date();
     this.session = {};
     this.socket = socket;
-    this.req = req;
     this.isAlive = true;
     this.rooms = [];
 
@@ -85,25 +85,24 @@ export default class Client {
     } catch ( error ) { /* error */ }
   }
 
-  request ( messageObject: Object, atStarted: number ) {
-    const urlDelegate = URLparse( messageObject.url );
-    const urlObject = new URL( messageObject.url );
+  /**
+   *before call route method
+   *
+   * @param {Object} messageObject
+   * @param {number} atStarted
+   * @returns {PreRequest}
+   * @memberof Client
+   */
+  request ( messageObject: Object, atStarted: number ): PreRequest {
+    const obj: PreRequest = {
+      at_started : atStarted,
 
-    let obj = Object.assign( {}, this.req );
-    obj = Object.assign( obj, urlDelegate );
+      // reference client session to each request
+      session : this.session,
 
-    obj.headers = Object.assign( {}, messageObject, { body : undefined } );
-    obj.body = messageObject.body;
-    obj.query = {};
-    obj.params = {};
-    obj.at_started = atStarted;
-
-    // reference client session to each request
-    obj.session = this.session;
-
-    urlObject.searchParams.forEach( ( value, name ) => {
-      obj.query[ name ] = value;
-    } );
+      // its received all of message
+      payloadJSON : messageObject,
+    };
 
     return obj;
   }

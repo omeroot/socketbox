@@ -26,6 +26,9 @@ describe( 'Route', ( done ) => {
 
     const req = {
       pathname : '/api/v1/user/profile',
+      payloadJSON: {
+        url: 'ws://toome.app/user/profile'
+      }
     };
     const res = {};
 
@@ -42,6 +45,9 @@ describe( 'Route', ( done ) => {
 
     const req = {
       path : '/api/v2/user/profile',
+      payloadJSON: {
+        url: 'ws://omer.app/api/v2/user/profile'
+      }
     };
     const res = {
       send : ( response ) => {
@@ -52,4 +58,20 @@ describe( 'Route', ( done ) => {
 
     Route.routeTo( req, res );
   } );
+
+  it('queryParser', (done) => {
+    const req = {
+      payloadJSON: {
+        url: 'ws://omer.app/api/v1?keyword=25&width=40&height=124.33'
+      }
+    }
+
+    const queryObj = Route.queryParser(req.payloadJSON);
+
+    assert(queryObj.keyword === '25');
+    assert(queryObj.width === '40');
+    assert(queryObj.height === '124.33');
+
+    done();
+  })
 } );

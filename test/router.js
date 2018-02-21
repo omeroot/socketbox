@@ -109,5 +109,5 @@ describe('Router', () => {
         r.callNextFunctions(req, res);
       });
     })
-  })
+  });
 });

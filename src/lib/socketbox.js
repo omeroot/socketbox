@@ -6,16 +6,6 @@ import Route from './route';
 import Client from './client';
 import Cache from './cache';
 
-/**
- * @private
- */
-const onClientIsDead = Symbol( 'onClientIsDead' );
-
-/**
- * @private
- */
-const checkAliveSockets = Symbol( 'checkAliveSockets' );
-
 export default class Socketbox extends EventEmitter {
   // default box options
   boxoptions: Object = {
@@ -36,13 +26,13 @@ export default class Socketbox extends EventEmitter {
     }
 
     // check which sockets dont response our ping message
-    if ( this.boxoptions.ping ) { setInterval( this[ checkAliveSockets ].bind( this ), this.boxoptions.pingTimeout ); }
+    if ( this.boxoptions.ping ) { setInterval( this.checkAliveSockets.bind( this ), this.boxoptions.pingTimeout ); }
   }
 
-  [checkAliveSockets] () {
-    for ( const client of Cache.clientsMap() ) {
+  checkAliveSockets () {
+    for ( const client of Cache.clientsMap.values() ) {
       if ( !client.getIsAlive() ) {
-        this[ onClientIsDead ]( client );
+        this.onClientIsDead( client );
         return;
       }
 
@@ -50,14 +40,14 @@ export default class Socketbox extends EventEmitter {
 
       const delivered = client.ping();
       if ( !delivered ) {
-        this[ onClientIsDead ]( client );
+        this.onClientIsDead( client );
       }
     }
   }
 
-  [onClientIsDead] ( client ) {
-    this.emit( 'disconnected', Object.assign( {}, client ) );
+  onClientIsDead ( client ) {
     this.destroyClient( client );
+    this.emit( 'disconnected', Object.assign( {}, client ) );
   }
 
   createServer ( socketServer: Object ) {
