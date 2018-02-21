@@ -12,6 +12,9 @@
   },
   "author": "omer demircan <demircanomer91@gmail.com>",
   "license": "MIT",
+  "engines": {
+    "node": ">=7"
+  },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.39",
     "@babel/plugin-transform-flow-strip-types": "^7.0.0-beta.39",
