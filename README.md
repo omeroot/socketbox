@@ -243,7 +243,9 @@ req.hash; // #hash
 ##### Actually response object is client reference.
 You can put string, json or buffer to message.
 ```js
-res.send(JSON.stringify({name: 'omer'}));
+// you can send Object or raw string
+
+res.send({name: 'omer'});
 
 res.send(new Buffer('omer'));
 ```
