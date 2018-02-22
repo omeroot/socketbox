@@ -5,6 +5,7 @@ import _Router from './router';
 import Route from './route';
 import Client from './client';
 import Cache from './cache';
+import Proxy from './proxy';
 
 export default class Socketbox extends EventEmitter {
   // default box options
@@ -23,10 +24,18 @@ export default class Socketbox extends EventEmitter {
 
     if ( this.boxoptions.ping ) {
       if ( typeof this.boxoptions.pingTimeout !== 'number' ) { throw new TypeError( 'pingTimeout type must be number' ); }
-    }
 
-    // check which sockets dont response our ping message
-    if ( this.boxoptions.ping ) { setInterval( this.checkAliveSockets.bind( this ), this.boxoptions.pingTimeout ); }
+      Proxy.add( ( req, res, next ) => {
+        if ( req.rawMessage === 'pong' ) {
+          res.heartbeat();
+          return;
+        }
+
+        next();
+      } );
+
+      setInterval( this.checkAliveSockets.bind( this ), this.boxoptions.pingTimeout );
+    }
   }
 
   checkAliveSockets () {

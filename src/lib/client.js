@@ -3,11 +3,10 @@ import crypto from 'crypto';
 import Route from './route';
 import Cache from './cache';
 import Channel from './channel';
+import Proxy from './proxy';
 import { PreRequest } from './types';
 
-// TODO: client disconnect without isAlive check
-
-export default class Client {
+export default class Client extends Proxy {
   __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
 
   ip: string;
@@ -17,7 +16,17 @@ export default class Client {
   isAlive: Boolean;
   rooms: Array<string>;
 
+  /**
+   * Creates an instance of Client.
+   * Only use static methods of Proxy class.
+   *
+   * @param {*} socket raw socket object.
+   * @param {*} req upgraded http request object.
+   * @memberof Client
+   */
   constructor ( socket: any, req: any ) {
+    super();
+
     this.ip = req.connection.remoteAddress;
     this.atConnected = new Date();
     this.session = {};
@@ -53,6 +62,14 @@ export default class Client {
     return Channel.join( cname, this );
   }
 
+  /**
+   * Check message and convert to string , it is referable
+   *
+   * @static
+   * @param {*} message
+   * @returns
+   * @memberof Client
+   */
   static serializeMessage ( message: any ) {
     let raw = '';
 
@@ -63,6 +80,27 @@ export default class Client {
     }
 
     return raw;
+  }
+
+  /**
+   * Check message and convert message to Object
+   *
+   * @static
+   * @param {*} message
+   * @memberof Client
+   */
+  deserialize ( message: any, atStarted ) {
+    try {
+      const json = JSON.parse( message );
+
+      if ( !json.url || !json.url.length ) {
+        return new Error( JSON.stringify( { statusCode : 404, error : 'Not found', message : 'url is not defined' } ) );
+      }
+
+      return this.request( json, message, atStarted );
+    } catch ( error ) {
+      return this.request( undefined, message, atStarted );
+    }
   }
 
   leave ( cname ) {
@@ -86,14 +124,14 @@ export default class Client {
   }
 
   /**
-   *before call route method
+   * before call route method
    *
-   * @param {Object} messageObject
-   * @param {number} atStarted
+   * @param {(Object | string)} messageObject deserialized message
+   * @param {number} atStarted first step time
    * @returns {PreRequest}
    * @memberof Client
    */
-  request ( messageObject: Object, atStarted: number ): PreRequest {
+  request ( messageObject?: Object, rawMessage: string, atStarted: number ): PreRequest {
     const obj: PreRequest = {
       at_started : atStarted,
 
@@ -102,23 +140,43 @@ export default class Client {
 
       // its received all of message
       payloadJSON : messageObject,
+
+      // original received raw message string default
+      rawMessage,
+      route : !!messageObject,
     };
 
     return obj;
   }
 
-  handle ( message: string ) {
+  /**
+   * If received data is not object type, return error -> bad request
+   * If received data has not url, return error -> 404 not found
+   * User can only accept the non-object message on middleware -> app.use() methods
+   *
+   * @param {string} message received raw string message
+   * @returns
+   * @memberof Client
+   */
+  async handle ( message: string ) {
     try {
-      if ( message === 'pong' ) return this.heartbeat();
-
       const atStarted = Date.now();
-      const json = JSON.parse( message );
+      const deserializedData = this.deserialize( message, atStarted );
 
-      if ( !json.url || !json.url.length ) throw Error( 'url is not defined' );
+      if ( deserializedData instanceof Error ) return this.send( deserializedData.message );
 
-      return Route.routeTo( this.request( json, atStarted ), this );
+      /**
+       * only call on all request message.
+       * dont support handler, which has request path!!
+       */
+      await this.constructor.callProxyHandlers( deserializedData, this );
+
+      // if message is not routable, don't route
+      if ( !deserializedData.route ) return true;
+
+      return Route.routeTo( deserializedData, this );
     } catch ( error ) {
-      return this.send( { statusCode : 401, message : error.message } );
+      return this.send( { statusCode : 500, message : error.message } );
     }
   }
 

@@ -13,6 +13,7 @@ export const randomString   = ( _length ) => {
     .join( '' );
 };
 
+// TODO: result array fill
 export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   const resultArray  = [];
 
@@ -20,7 +21,11 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
 
   const next = ( index ) => {
     if ( arr[ index ] ) {
-      arr[ index ]( req, res, next.bind( null, index + 1 ) );
+      try {
+        arr[ index ]( req, res, next.bind( null, index + 1 ) );
+      } catch ( error ) {
+        reject();
+      }
     }
 
     approve();

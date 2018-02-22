@@ -2,6 +2,7 @@
 import pathToRegexp from 'path-to-regexp';
 import __path from 'path';
 import { sync } from './utility';
+import { PreRequest } from './types';
 
 export default class Router {
   /**
@@ -71,7 +72,7 @@ export default class Router {
     return { match, index };
   }
 
-  callNextFunctions ( req: any, res: any ) {
+  callNextFunctions ( req: PreRequest, res: any ) {
     const { pathname } = req;
     const { match, index } = this.findAndGetPathInMap( pathname );
 
@@ -80,6 +81,12 @@ export default class Router {
       return;
     }
 
-    this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
+    this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res )
+      .then( () => {
+        req.at_finish = Date.now();
+      } )
+      .catch( ( e ) => {
+        console.log( e );
+      } );
   }
 }
