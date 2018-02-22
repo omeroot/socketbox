@@ -38,6 +38,19 @@ export default class Socketbox extends EventEmitter {
     }
   }
 
+  static Router () {
+    return new _Router();
+  }
+
+  static Cache () {
+    return Cache;
+  }
+
+  pre ( ...funcs ) {
+    Proxy.add( funcs );
+    return this;
+  }
+
   checkAliveSockets () {
     for ( const client of Cache.clientsMap.values() ) {
       if ( !client.getIsAlive() ) {
@@ -83,14 +96,6 @@ export default class Socketbox extends EventEmitter {
     this.emit( 'connected', newClient );
 
     return newClient;
-  }
-
-  static Router () {
-    return new _Router();
-  }
-
-  static Cache () {
-    return Cache;
   }
 
   use ( prefix: string, router: Object ) {

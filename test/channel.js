@@ -44,12 +44,12 @@ describe( 'Channel', () => {
       // virtual req object
       var req = {connection: {remoteConnection: '::1'}};
       var c = new Client(net.Socket(), req);
-      c.join('room3');
-      assert.strictEqual(c.join('room3'), false);
+      c.join('room8');
+      assert.strictEqual(c.join('room8'), false);
       done();
     })
 
-    it( 'Publish', ( done ) => {
+    it( 'Publish to existing', ( done ) => {
       const wServer = new WebSocket.Server( { port : 7711 } );
       let counter = 0;
       let connectionCounter = 0;
@@ -77,5 +77,10 @@ describe( 'Channel', () => {
       s1.on( 'message', handle );
       s2.on( 'message', handle );
     } );
+
+    it('Publish to non-existing', (done) => {
+      assert(Channel.publish('xx-yy-zz') === false);
+      done();
+    })
   } );
 } );

@@ -4,7 +4,7 @@
   "description": "Socketbox is real time socket layer framework inspired by express",
   "main": "dist/socketbox.js",
   "scripts": {
-    "test": "mocha --exit -t 10000 -b --require babel-core/register test/* --inspector",
+    "test": "mocha -s 0 --exit -t 10000 -b --require babel-core/register test/* --inspector",
     "cov": "rm -rf coverage && node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha --exit -b -t 10000 test/**/*.js",
     "build": "rm -rf dist/* && NODE_ENV=prod webpack",
     "build:dev": "rm -rf dist/* && NODE_ENV=dev webpack",

@@ -32,7 +32,9 @@ describe('Utility', () => {
     });
 
     it('Run sync reject', (done) => {
-      sync('f1', {}, {}).catch(done);
+      sync('f1', {}, {}).catch(() => {
+        done();
+      });
     })
 
     it('Run sync', (done) => {

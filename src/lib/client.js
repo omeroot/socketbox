@@ -120,7 +120,7 @@ export default class Client extends Proxy {
   send ( message: any ) {
     try {
       this.socket.send( this.constructor.serializeMessage( message ) );
-    } catch ( error ) { /* error */ }
+    } catch ( error ) { /* error */ console.log( error ); }
   }
 
   /**
@@ -202,11 +202,6 @@ export default class Client extends Proxy {
     } catch ( error ) { console.log( error ); return false; }
 
     return true;
-  }
-
-  // interface
-  noop () {
-    return this;
   }
 
   handleError ( error ) {

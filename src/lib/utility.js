@@ -24,7 +24,7 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
       try {
         arr[ index ]( req, res, next.bind( null, index + 1 ) );
       } catch ( error ) {
-        reject();
+        reject( error );
       }
     }
 
@@ -34,7 +34,7 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   try {
     arr[ 0 ]( req, res, next.bind( null, 1 ) );
   } catch ( error ) {
-    reject();
+    reject( error );
   }
 
   return true;
