@@ -1,7 +1,6 @@
 src
 node_modules
 examples
-package-lock
 .*.swp
 ._*
 .DS_Store
