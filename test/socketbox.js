@@ -6,6 +6,7 @@ import Socketbox from './../src'
 import Router from './../src/lib/router';
 import Client from './../src/lib/client';
 import Cache from './../src/lib/cache';
+import ProxyHandler from './../src/lib/proxy-handler'
 
 describe('Socketbox app', () => {
   describe('Socketbox with options', () => {
@@ -158,7 +159,8 @@ describe('Socketbox app', () => {
         done();
       });
 
-      it('one params is only router', (done) => {
+      it('one params, which is only router', (done) => {
+        ProxyHandler.mountedHandler.clear();
         const app = new Socketbox();
         const r = new Socketbox.Router();
         app.use(r);

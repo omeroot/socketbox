@@ -15,12 +15,6 @@ describe('Router', () => {
       assert.throws(() => router.register(12));
     });
 
-    it('path is already registered', () => {
-      const router = new Router();
-      router.register('/test', (req, res) => {});
-      assert.throws(() => router.register('/test', (req, res) => {}));
-    });
-
     it('handle is not defined', () => {
       const router = new Router();
       assert.throws(() => router.register('/test'));
@@ -86,14 +80,14 @@ describe('Router', () => {
         r.register('/message/write', () =>{});
 
         const req = {pathname: '/message/send'};
-        const res = {
-          send: (response) => {
-            assert(response.statusCode === 404);
-            done();
-          } 
-        };
+        const res = {};
 
-        r.callNextFunctions(req, res);
+        const promise = Promise.resolve(r.callNextFunctions(req, res));
+
+        promise.then((v) => {
+          assert( v === false);
+          done();
+        });
       });
 
       it('200 status', (done) => {
@@ -105,8 +99,12 @@ describe('Router', () => {
 
         const req = {pathname: '/message/write'};
         const res = {};
+        const promise = Promise.resolve(r.callNextFunctions(req, res));
 
-        r.callNextFunctions(req, res);
+        promise.then((v) => {
+          assert( v === true);
+          done();
+        });
       });
     })
   });

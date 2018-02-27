@@ -1,6 +1,6 @@
 // @flow
 import pathToRegexp from 'path-to-regexp';
-import __path from 'path';
+import path from 'path';
 import { sync } from './utility';
 import Request from './request';
 
@@ -28,33 +28,45 @@ export default class Router {
   prefix: string
   prefixRegExp: RegExp;
 
+  /**
+   * array, there called with app.use
+   *
+   * @type {Array<Function>}
+   * @memberof Router
+   */
+  middleware: Array<Function> = [];
+
   constructor ( prefix: string ) {
     this.setPrefix( ( prefix && prefix.length ) ? prefix : '/' );
   }
 
-  handler ( req, res, next ): number {
+  async prehandler ( req, res, next ): number {
+    let matched;
+
     if ( this.prefixRegExp.test( req.pathname ) ) {
-      this.callNextFunctions( req, res );
-      next( 999 );
+      await sync( this.middleware, req, res );
+      matched = await this.callNextFunctions( req, res );
     }
 
-    next( -1 );
+    if ( !matched ) next();
   }
 
-  register ( path: string, ...args: Array<Function> ) {
-    if ( typeof path !== 'string' ) throw new Error( `path is invalid type. [${path}]` );
-    if ( !args.length ) throw new Error( `Handle function is not defined path=[${path}]` );
+  register ( _path: string, ...args: Array<Function> ) {
+    if ( typeof _path !== 'string' ) throw new Error( `path is invalid type. [${_path}]` );
+    if ( !args.length ) throw new Error( `Handle function is not defined path=[${_path}]` );
 
-    path = __path.join( this.prefix, path.toLowerCase() );
+    const fullpath = path.join( this.prefix, _path.toLowerCase() );
+    const pathIsRegexed = pathToRegexp( fullpath );
 
-    const pathIsRegexed = pathToRegexp( path );
+    let index: number = this.routePath.indexOf( fullpath );
 
-    if ( this.routePath.indexOf( path ) >= 0 ) throw new Error( `Route already registered. [${path}]` );
-
-    const index: number = this.routePathRegex.push( pathIsRegexed ) - 1;
-
-    this.routePath.push( path );
-    this.mapping[ index.toString() ] = args;
+    if ( index < 0 ) {
+      this.routePath.push( fullpath );
+      index = this.routePathRegex.push( pathIsRegexed ) - 1;
+      this.mapping[ index.toString() ] = args;
+    } else {
+      this.mapping[ index.toString() ] = this.mapping[ index.toString() ].concat( args );
+    }
 
     return true;
   }
@@ -86,7 +98,6 @@ export default class Router {
     const { match, index } = this.findAndGetPathInMap( pathname );
 
     if ( !match ) {
-      res.send( { statusCode : 404, error : 'Not found', message : 'url is not defined' } );
       return false;
     }
 

@@ -63,20 +63,21 @@ describe('Utility', () => {
     });
   });
 
-  it('queryParser', (done) => {
+  it('urlParser', (done) => {
     const req = {
       headers: {
         url: 'ws://omer.app/api/v1?keyword=25&width=40&height=124.33'
       },
+      isRoutable: true,
       query: {}
     }
 
-    urlParser(req);
-
-    assert(req.query.keyword === '25');
-    assert(req.query.width === '40');
-    assert(req.query.height === '124.33');
-
-    done();
+    urlParser(req, {}, function(){
+      assert(req.query.keyword === '25');
+      assert(req.query.width === '40');
+      assert(req.query.height === '124.33');
+  
+      done();
+    });
   });
 });

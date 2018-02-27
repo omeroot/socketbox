@@ -66,7 +66,7 @@ export default class Request {
    */
   isRoutable: true;
 
-  pathname: string;
+  pathname: string = '/';
   hostname: string;
   href: string;
 

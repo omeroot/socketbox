@@ -1,5 +1,6 @@
 // @flow
 /* eslint no-restricted-syntax: 0 */
+/* eslint prefer-rest-params: 0 */
 import { EventEmitter } from 'events';
 import _Router from './router';
 import Client from './client';
@@ -86,8 +87,10 @@ export default class Socketbox extends EventEmitter {
     return newClient;
   }
 
-  use ( prefix: string, router: Object ) {
-    ProxyHandler.add( prefix, router );
+  use ( prefix: string, _fn: any ) {
+    if ( Array.prototype.slice.call( arguments ).length === 0 ) return false;
+    ProxyHandler.add( prefix, _fn );
+
     return this;
   }
 }

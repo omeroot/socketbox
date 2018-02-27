@@ -1,58 +1,61 @@
 // @flow
-/* eslint no-restricted-syntax: 0 */
-/* eslint no-await-in-loop: 0 */
 import Router from './router';
 
 export default class ProxyHandler {
-  static mountedHandler: Map<string, Array<Function>> = new Map();
+  static mountedHandler: Map<string, Router> = new Map();
 
-  static add ( targetPath: string | Array<Function>, ...funcArr: Array<Function> ) {
-    let funcs;
+  static add ( targetPath: string | Function, fn: Function ) {
+    let _fn;
     let path = '/';
 
     if ( !targetPath ) return false;
 
-    if ( !funcs ) {
-      funcs = path;
+    if ( !fn ) {
+      _fn = targetPath;
     } else {
-      funcs = funcArr;
+      _fn = fn;
       path = targetPath;
     }
 
-    if ( !Array.isArray( funcs ) || !funcs.length ) return false;
+    if ( typeof path !== 'string' || !path.length ) throw new TypeError( 'use method path should be string.' );
+    if ( typeof _fn !== 'function' && !( _fn instanceof Router ) ) throw new TypeError( 'use method requires function or router instance.' );
+    if ( this.mountedHandler.has( path ) && _fn instanceof Router ) throw new Error( 'router already cached.' );
 
-    funcs.forEach( ( fn ) => {
-      if ( typeof fn !== 'function' || fn instanceof Router ) throw new TypeError( 'use method requires function or router instance' );
+    if ( this.mountedHandler.has( path ) ) {
+      const _router = this.mountedHandler.get( path );
+      _router.middleware.push( _fn );
+      return true;
+    }
 
-      let _fn;
-
-      if ( fn instanceof Router ) {
-        fn.setPrefix( path );
-        _fn = fn.handler;
-      } else {
-        _fn = fn;
-      }
-
+    if ( _fn instanceof Router ) {
+      _fn.setPrefix( path );
       this.mountedHandler.set( path, _fn );
-    } );
+      return true;
+    }
 
-    return funcs.length;
-  }
+    const newRouter = new Router( path );
 
-  static runner ( _tupple: Array, req, res ) {
-    return new Promise( ( approve ) => {
-      _tupple[ 1 ]( req, res, approve );
-    } );
+    newRouter.middleware.push( _fn );
+    this.mountedHandler.set( path, newRouter );
+
+    return true;
   }
 
   static async callProxyHandlers ( req, res ) {
-    let isNotFound = true;
+    const iterator = this.mountedHandler.entries();
 
-    for ( const tuple of this.mountedHandler ) {
-      const found = await this.runner( tuple, req, res );
-      if ( found && req.isRoutable ) isNotFound = false;
-    }
+    const runner = () => {
+      const v = iterator.next();
 
-    if ( isNotFound ) res.send( { statusCode : 404, error : 'Not found', message : 'url is not defined' } );
+      if ( !v.done ) {
+        const _router = v.value[ 1 ];
+        _router.prehandler( req, res, runner );
+        return;
+      }
+
+      res.send( { statusCode : 404, error : 'Not found', message : 'url is not defined' } );
+    };
+
+    runner();
   }
 }

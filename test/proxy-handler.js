@@ -13,38 +13,24 @@ describe('ProxyHandler', () => {
       done();
     });
 
-    it('multiple function', (done) => {
-      ProxyHandler.requestHandler = [];
-      const result = [];
-
-      const f1 = () => {
-        result.push('1');
-        return 1;
-      }
-      const f2 = () => {
-        result.push('2');
-        return 2;
-      }
-
-      ProxyHandler.add(f1,f2);
-      assert(ProxyHandler.requestHandler[0]() === 1);
-      assert(ProxyHandler.requestHandler[1]() === 2);
-      done();
-    });
-
     it('add single function', (done) => {
-      ProxyHandler.requestHandler = [];
-      ProxyHandler.add(() => {
-        done();
-      });
+      ProxyHandler.mountedHandler.clear();
 
-      ProxyHandler.callProxyHandlers({},{});
+      var f1 = (req, res, next) => {
+        done();
+      }
+
+      ProxyHandler.add(f1);
+
+      ProxyHandler.callProxyHandlers({pathname: '/'},{
+        send: function(){}
+      });
     });
   });
 
-  it('callProxyHandlers', (done) => {
+  it('callProxyHandlers without response - use only middleware', (done) => {
     // clear add functions
-    ProxyHandler.requestHandler = [];
+    ProxyHandler.mountedHandler.clear();
     const result = [];
 
     const f1 = (req, res, next) => {
@@ -62,8 +48,20 @@ describe('ProxyHandler', () => {
     ProxyHandler.add(f1);
     ProxyHandler.add(f2);
 
-    ProxyHandler.callProxyHandlers({
-      isRoutable: false
-    },{});
+    ProxyHandler.callProxyHandlers({pathname: '/'},{
+      send: function(){}
+    });
+  });
+
+  it('callProxyHandlers 404 Notfound', (done) => {
+    // clear add functions
+    ProxyHandler.mountedHandler.clear();
+
+    ProxyHandler.callProxyHandlers({pathname: '/'},{
+      send: function(v){
+        assert(v.statusCode === 404);
+        done();
+      }
+    });
   });
 });
