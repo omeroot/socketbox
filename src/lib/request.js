@@ -61,10 +61,10 @@ export default class Request {
   /**
    * If raw message is object, request is routable
    *
-   * @type {true}
+   * @type {boolean}
    * @memberof Request
    */
-  isRoutable: true;
+  isRoutable: boolean = true;
 
   pathname: string = '/';
   hostname: string;
@@ -73,13 +73,5 @@ export default class Request {
   constructor ( raw ) {
     this.atStarted = Date.now();
     this.rawMessage = raw;
-  }
-
-  setHeaders ( key, value ) {
-    if ( !key || !value ) throw new Error( 'setHeaders key & value is required' );
-
-    if ( typeof key !== 'string' || typeof value !== 'string' ) throw new TypeError( 'setHeaders key & value type should be string' );
-
-    this.headers[ key ] = value;
   }
 }

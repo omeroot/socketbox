@@ -57,12 +57,8 @@ export const deserialize = ( req, res, next ) => {
   try {
     const json = JSON.parse( req.rawMessage );
 
-    if ( !json.url || !json.url.length ) {
-      return new Error( JSON.stringify( { statusCode : 404, error : 'Not found', message : 'url is not defined' } ) );
-    }
-
-    req.body = json;
-    req.headers = Object.assign( {}, json, { data : undefined } );
+    req.body = json.body;
+    req.headers = Object.assign( {}, json, { body : undefined } );
 
     return next();
   } catch ( e ) {
@@ -81,7 +77,7 @@ export const pingPong = ( req, res, next ) => {
 };
 
 export const urlParser = ( req, res, next ) => {
-  if ( !req.isRoutable ) return;
+  if ( !req.isRoutable ) return false;
 
   const urlObject = new URL( req.headers.url );
 
@@ -98,5 +94,6 @@ export const urlParser = ( req, res, next ) => {
   req.href = urlObject.href;
 
   next();
+  return true;
 };
 

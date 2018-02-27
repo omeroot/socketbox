@@ -110,6 +110,7 @@ describe('Socketbox app', () => {
     });
 
     it('checkIsAlive', (done) => {
+      ProxyHandler.mountedHandler.clear();
       const app = new Socketbox({
         ping: true,
         pingTimeout: 1 * 1000
@@ -134,7 +135,7 @@ describe('Socketbox app', () => {
         const c = Cache.sGet(__uid__);
 
         assert(c === undefined);
-        assert(pingCounter === 5);
+        assert(pingCounter === 2);
         wss.close(done);
       });
 
@@ -144,7 +145,7 @@ describe('Socketbox app', () => {
         connection.onmessage = (evt) => {
           assert(evt.data === 'ping');
 
-          if(pingCounter < 5){
+          if(pingCounter < 2){
             connection.send('pong');
             pingCounter += 1;
           }

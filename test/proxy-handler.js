@@ -17,6 +17,7 @@ describe('ProxyHandler', () => {
       ProxyHandler.mountedHandler.clear();
 
       var f1 = (req, res, next) => {
+        next();
         done();
       }
 
