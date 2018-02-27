@@ -1,7 +1,8 @@
 // @flow
 import pathToRegexp from 'path-to-regexp';
-import __path from 'path';
+import path from 'path';
 import { sync } from './utility';
+import Request from './request';
 
 export default class Router {
   /**
@@ -27,24 +28,45 @@ export default class Router {
   prefix: string
   prefixRegExp: RegExp;
 
+  /**
+   * array, there called with app.use
+   *
+   * @type {Array<Function>}
+   * @memberof Router
+   */
+  middleware: Array<Function> = [];
+
   constructor ( prefix: string ) {
     this.setPrefix( ( prefix && prefix.length ) ? prefix : '/' );
   }
 
-  register ( path: string, ...args: Array<Function> ) {
-    if ( typeof path !== 'string' ) throw new Error( `path is invalid type. [${path}]` );
-    if ( !args.length ) throw new Error( `Handle function is not defined path=[${path}]` );
+  async prehandler ( req, res, next ): number {
+    let matched;
 
-    path = __path.join( this.prefix, path.toLowerCase() );
+    if ( this.prefixRegExp.test( req.pathname ) ) {
+      await sync( this.middleware, req, res );
+      matched = await this.callNextFunctions( req, res );
+    }
 
-    const pathIsRegexed = pathToRegexp( path );
+    if ( !matched ) next();
+  }
 
-    if ( this.routePath.indexOf( path ) >= 0 ) throw new Error( `Route already registered. [${path}]` );
+  register ( _path: string, ...args: Array<Function> ) {
+    if ( typeof _path !== 'string' ) throw new Error( `path is invalid type. [${_path}]` );
+    if ( !args.length ) throw new Error( `Handle function is not defined path=[${_path}]` );
 
-    const index: number = this.routePathRegex.push( pathIsRegexed ) - 1;
+    const fullpath = path.join( this.prefix, _path.toLowerCase() );
+    const pathIsRegexed = pathToRegexp( fullpath );
 
-    this.routePath.push( path );
-    this.mapping[ index.toString() ] = args;
+    let index: number = this.routePath.indexOf( fullpath );
+
+    if ( index < 0 ) {
+      this.routePath.push( fullpath );
+      index = this.routePathRegex.push( pathIsRegexed ) - 1;
+      this.mapping[ index.toString() ] = args;
+    } else {
+      this.mapping[ index.toString() ] = this.mapping[ index.toString() ].concat( args );
+    }
 
     return true;
   }
@@ -71,15 +93,22 @@ export default class Router {
     return { match, index };
   }
 
-  callNextFunctions ( req: any, res: any ) {
+  async callNextFunctions ( req: Request, res: any ) {
     const { pathname } = req;
     const { match, index } = this.findAndGetPathInMap( pathname );
 
     if ( !match ) {
-      res.send( { statusCode : 404 } );
-      return;
+      return false;
     }
 
-    this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
+    try {
+      await this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
+      req.at_finish = Date.now();
+
+      return true;
+    } catch ( error ) {
+      console.log( error );
+      return false;
+    }
   }
 }

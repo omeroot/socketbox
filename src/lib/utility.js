@@ -1,3 +1,7 @@
+// @flow
+
+import { URL } from 'url';
+
 export const randomString   = ( _length ) => {
   let length;
 
@@ -13,6 +17,7 @@ export const randomString   = ( _length ) => {
     .join( '' );
 };
 
+// TODO: result array fill
 export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   const resultArray  = [];
 
@@ -20,7 +25,11 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
 
   const next = ( index ) => {
     if ( arr[ index ] ) {
-      arr[ index ]( req, res, next.bind( null, index + 1 ) );
+      try {
+        arr[ index ]( req, res, next.bind( null, index + 1 ) );
+      } catch ( error ) {
+        reject( error );
+      }
     }
 
     approve();
@@ -29,8 +38,62 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   try {
     arr[ 0 ]( req, res, next.bind( null, 1 ) );
   } catch ( error ) {
-    reject();
+    reject( error );
   }
 
   return true;
 } );
+
+
+/**
+ *
+ * Check message and convert message to Object
+ *
+ * @param {Request} req
+ * @param {Client} res
+ * @param {Function} next
+ */
+export const deserialize = ( req, res, next ) => {
+  try {
+    const json = JSON.parse( req.rawMessage );
+
+    req.body = json.body;
+    req.headers = Object.assign( {}, json, { body : undefined } );
+
+    return next();
+  } catch ( e ) {
+    req.isRoutable = false;
+    return next();
+  }
+};
+
+export const pingPong = ( req, res, next ) => {
+  if ( req.rawMessage === 'pong' ) {
+    res.heartbeat();
+    return;
+  }
+
+  next();
+};
+
+export const urlParser = ( req, res, next ) => {
+  if ( !req.isRoutable ) return false;
+
+  const urlObject = new URL( req.headers.url );
+
+  /**
+     * url query variables convert to object
+     * ?a=b&c=d --> {a: b, c: d}
+     */
+  urlObject.searchParams.forEach( ( value, name ) => {
+    req.query[ name ] = value;
+  } );
+
+  req.pathname = urlObject.pathname;
+  req.hostname = urlObject.hostname;
+  req.href = urlObject.href;
+
+  next();
+  return true;
+};
+

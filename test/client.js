@@ -1,6 +1,7 @@
 import assert from 'assert';
 import net from 'net';
 import Client from './../src/lib/client';
+import Channel from './../src/lib/channel';
 
 describe('Client', () => {
   it('SerializeMessage message type =string', (done) => {
@@ -67,6 +68,45 @@ describe('Client', () => {
     const c = new Client( socket, req );
 
     assert(c.getIsAlive() === true);
+    done();
+  });
+
+  it('join', (done) => {
+    var req = {connection: {remoteConnection: '::1'}};
+    var socket = net.Socket();
+
+    socket.terminate = () => {};
+    const c = new Client( socket, req );
+
+    c.join('reddit');
+
+    assert(c.rooms.indexOf('reddit') >= 0);
+    done();
+  });
+
+  it('leave from not existed room', (done) => {
+    var req = {connection: {remoteConnection: '::1'}};
+    var socket = net.Socket();
+
+    socket.terminate = () => {};
+    const c = new Client( socket, req );
+
+    c.join('reddit');
+
+    assert(c.leave('rdt') === false);
+    done();
+  });
+
+  it('leave from joined room', (done) => {
+    var req = {connection: {remoteConnection: '::1'}};
+    var socket = net.Socket();
+    socket.terminate = () => {};
+
+    const c = new Client( socket, req );
+
+    c.join('reddit');
+    c.leave('reddit');
+    assert(c.rooms.indexOf('reddit') < 0);
     done();
   });
 });

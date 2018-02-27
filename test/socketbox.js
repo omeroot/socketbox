@@ -6,6 +6,7 @@ import Socketbox from './../src'
 import Router from './../src/lib/router';
 import Client from './../src/lib/client';
 import Cache from './../src/lib/cache';
+import ProxyHandler from './../src/lib/proxy-handler'
 
 describe('Socketbox app', () => {
   describe('Socketbox with options', () => {
@@ -109,6 +110,7 @@ describe('Socketbox app', () => {
     });
 
     it('checkIsAlive', (done) => {
+      ProxyHandler.mountedHandler.clear();
       const app = new Socketbox({
         ping: true,
         pingTimeout: 1 * 1000
@@ -133,7 +135,7 @@ describe('Socketbox app', () => {
         const c = Cache.sGet(__uid__);
 
         assert(c === undefined);
-        assert(pingCounter === 5);
+        assert(pingCounter === 2);
         wss.close(done);
       });
 
@@ -143,7 +145,7 @@ describe('Socketbox app', () => {
         connection.onmessage = (evt) => {
           assert(evt.data === 'ping');
 
-          if(pingCounter < 5){
+          if(pingCounter < 2){
             connection.send('pong');
             pingCounter += 1;
           }
@@ -158,7 +160,8 @@ describe('Socketbox app', () => {
         done();
       });
 
-      it('one params is only router', (done) => {
+      it('one params, which is only router', (done) => {
+        ProxyHandler.mountedHandler.clear();
         const app = new Socketbox();
         const r = new Socketbox.Router();
         app.use(r);

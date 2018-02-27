@@ -1,11 +1,10 @@
 // @flow
 import crypto from 'crypto';
-import Route from './route';
 import Cache from './cache';
 import Channel from './channel';
-import { PreRequest } from './types';
-
-// TODO: client disconnect without isAlive check
+import ProxyHandler from './proxy-handler';
+import Request from './request';
+import { deserialize } from './utility';
 
 export default class Client {
   __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
@@ -17,6 +16,14 @@ export default class Client {
   isAlive: Boolean;
   rooms: Array<string>;
 
+  /**
+   * Creates an instance of Client.
+   * Only use static methods of ProxyHandler class.
+   *
+   * @param {*} socket raw socket object.
+   * @param {*} req upgraded http request object.
+   * @memberof Client
+   */
   constructor ( socket: any, req: any ) {
     this.ip = req.connection.remoteAddress;
     this.atConnected = new Date();
@@ -53,6 +60,14 @@ export default class Client {
     return Channel.join( cname, this );
   }
 
+  /**
+   * Check message and convert to string , it is referable
+   *
+   * @static
+   * @param {*} message
+   * @returns
+   * @memberof Client
+   */
   static serializeMessage ( message: any ) {
     let raw = '';
 
@@ -82,43 +97,31 @@ export default class Client {
   send ( message: any ) {
     try {
       this.socket.send( this.constructor.serializeMessage( message ) );
-    } catch ( error ) { /* error */ }
+    } catch ( error ) { /* error */ console.log( error ); }
   }
 
   /**
-   *before call route method
+   * If received data is not object type, return error -> bad request
+   * If received data has not url, return error -> 404 not found
+   * User can only accept the non-object message on middleware -> app.use() methods
    *
-   * @param {Object} messageObject
-   * @param {number} atStarted
-   * @returns {PreRequest}
+   * @param {string} message received raw string message
+   * @returns
    * @memberof Client
    */
-  request ( messageObject: Object, atStarted: number ): PreRequest {
-    const obj: PreRequest = {
-      at_started : atStarted,
-
-      // reference client session to each request
-      session : this.session,
-
-      // its received all of message
-      payloadJSON : messageObject,
-    };
-
-    return obj;
-  }
-
-  handle ( message: string ) {
+  async handle ( message: string ) {
     try {
-      if ( message === 'pong' ) return this.heartbeat();
+      const request = new Request( message );
 
-      const atStarted = Date.now();
-      const json = JSON.parse( message );
-
-      if ( !json.url || !json.url.length ) throw Error( 'url is not defined' );
-
-      return Route.routeTo( this.request( json, atStarted ), this );
+      deserialize( request, this, () => {
+        /**
+         * only call on all request message.
+         * dont support handler, which has request path!!
+         */
+        ProxyHandler.callProxyHandlers( request, this );
+      } );
     } catch ( error ) {
-      return this.send( { statusCode : 401, message : error.message } );
+      this.send( { statusCode : 500, message : error.message } );
     }
   }
 
@@ -144,11 +147,6 @@ export default class Client {
     } catch ( error ) { console.log( error ); return false; }
 
     return true;
-  }
-
-  // interface
-  noop () {
-    return this;
   }
 
   handleError ( error ) {

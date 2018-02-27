@@ -30,6 +30,8 @@ export default class Channel {
       this.channels[ cname ].forEach( ( item ) => {
         item.send( message );
       } );
+
+      return true;
     }
 
     return false;
