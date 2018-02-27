@@ -2,7 +2,7 @@
 import pathToRegexp from 'path-to-regexp';
 import __path from 'path';
 import { sync } from './utility';
-import { PreRequest } from './types';
+import Request from './request';
 
 export default class Router {
   /**
@@ -30,6 +30,15 @@ export default class Router {
 
   constructor ( prefix: string ) {
     this.setPrefix( ( prefix && prefix.length ) ? prefix : '/' );
+  }
+
+  handler ( req, res, next ): number {
+    if ( this.prefixRegExp.test( req.pathname ) ) {
+      this.callNextFunctions( req, res );
+      next( 999 );
+    }
+
+    next( -1 );
   }
 
   register ( path: string, ...args: Array<Function> ) {
@@ -72,21 +81,23 @@ export default class Router {
     return { match, index };
   }
 
-  callNextFunctions ( req: PreRequest, res: any ) {
+  async callNextFunctions ( req: Request, res: any ) {
     const { pathname } = req;
     const { match, index } = this.findAndGetPathInMap( pathname );
 
     if ( !match ) {
-      res.send( { statusCode : 404 } );
-      return;
+      res.send( { statusCode : 404, error : 'Not found', message : 'url is not defined' } );
+      return false;
     }
 
-    this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res )
-      .then( () => {
-        req.at_finish = Date.now();
-      } )
-      .catch( ( e ) => {
-        console.log( e );
-      } );
+    try {
+      await this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
+      req.at_finish = Date.now();
+
+      return true;
+    } catch ( error ) {
+      console.log( error );
+      return false;
+    }
   }
 }

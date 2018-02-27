@@ -4,7 +4,8 @@
     "moduleName": "babel-runtime"
   }],
   "@babel/plugin-transform-flow-strip-types",
-  "babel-plugin-add-module-exports"
+  "babel-plugin-add-module-exports",
+  "transform-regenerator"
   ],
   "env": {
     "test": ["istanbul"]

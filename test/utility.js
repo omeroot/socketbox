@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import {randomString, sync} from './../src/lib/utility';
+import {randomString, sync, urlParser} from './../src/lib/utility';
 
 describe('Utility', () => {
   describe('randomString', () => {
@@ -61,5 +61,22 @@ describe('Utility', () => {
         done();
       })
     });
+  });
+
+  it('queryParser', (done) => {
+    const req = {
+      headers: {
+        url: 'ws://omer.app/api/v1?keyword=25&width=40&height=124.33'
+      },
+      query: {}
+    }
+
+    urlParser(req);
+
+    assert(req.query.keyword === '25');
+    assert(req.query.width === '40');
+    assert(req.query.height === '124.33');
+
+    done();
   });
 });

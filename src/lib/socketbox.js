@@ -2,10 +2,10 @@
 /* eslint no-restricted-syntax: 0 */
 import { EventEmitter } from 'events';
 import _Router from './router';
-import Route from './route';
 import Client from './client';
 import Cache from './cache';
-import Proxy from './proxy';
+import ProxyHandler from './proxy-handler';
+import { pingPong } from './utility';
 
 export default class Socketbox extends EventEmitter {
   // default box options
@@ -25,14 +25,7 @@ export default class Socketbox extends EventEmitter {
     if ( this.boxoptions.ping ) {
       if ( typeof this.boxoptions.pingTimeout !== 'number' ) { throw new TypeError( 'pingTimeout type must be number' ); }
 
-      Proxy.add( ( req, res, next ) => {
-        if ( req.rawMessage === 'pong' ) {
-          res.heartbeat();
-          return;
-        }
-
-        next();
-      } );
+      ProxyHandler.add( pingPong );
 
       setInterval( this.checkAliveSockets.bind( this ), this.boxoptions.pingTimeout );
     }
@@ -44,11 +37,6 @@ export default class Socketbox extends EventEmitter {
 
   static Cache () {
     return Cache;
-  }
-
-  pre ( ...funcs ) {
-    Proxy.add( funcs );
-    return this;
   }
 
   checkAliveSockets () {
@@ -99,23 +87,7 @@ export default class Socketbox extends EventEmitter {
   }
 
   use ( prefix: string, router: Object ) {
-    let __router: Object = {};
-    let __prefix: string = '/';
-
-    if ( !prefix ) {
-      return false;
-    }
-
-    if ( !router ) {
-      __router = prefix;
-    } else {
-      __prefix = prefix;
-      __router = router;
-    }
-
-    __router.setPrefix( __prefix );
-    Route.activateRouter( __router );
-
+    ProxyHandler.add( prefix, router );
     return this;
   }
 }

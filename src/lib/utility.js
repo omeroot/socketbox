@@ -1,3 +1,7 @@
+// @flow
+
+import { URL } from 'url';
+
 export const randomString   = ( _length ) => {
   let length;
 
@@ -39,3 +43,60 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
 
   return true;
 } );
+
+
+/**
+ *
+ * Check message and convert message to Object
+ *
+ * @param {Request} req
+ * @param {Client} res
+ * @param {Function} next
+ */
+export const deserialize = ( req, res, next ) => {
+  try {
+    const json = JSON.parse( req.rawMessage );
+
+    if ( !json.url || !json.url.length ) {
+      return new Error( JSON.stringify( { statusCode : 404, error : 'Not found', message : 'url is not defined' } ) );
+    }
+
+    req.body = json;
+    req.headers = Object.assign( {}, json, { data : undefined } );
+
+    return next();
+  } catch ( e ) {
+    req.isRoutable = false;
+    return next();
+  }
+};
+
+export const pingPong = ( req, res, next ) => {
+  if ( req.rawMessage === 'pong' ) {
+    res.heartbeat();
+    return;
+  }
+
+  next();
+};
+
+export const urlParser = ( req, res, next ) => {
+  if ( !req.isRoutable ) return;
+
+  const urlObject = new URL( req.headers.url );
+
+  /**
+     * url query variables convert to object
+     * ?a=b&c=d --> {a: b, c: d}
+     */
+  urlObject.searchParams.forEach( ( value, name ) => {
+    req.query[ name ] = value;
+  } );
+
+  req.pathname = urlObject.pathname;
+  req.hostname = urlObject.hostname;
+  req.href = urlObject.href;
+
+  next();
+};
+

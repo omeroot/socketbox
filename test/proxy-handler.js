@@ -1,20 +1,20 @@
 import assert from 'assert';
-import Proxy from './../src/lib/proxy';
+import ProxyHandler from './../src/lib/proxy-handler';
 
-describe('Proxy', () => {
+describe('ProxyHandler', () => {
   describe('add', (done) => {
     it('add empty parameter', (done) => {
-      assert(Proxy.add() === false);
+      assert(ProxyHandler.add() === false);
       done();
     });
 
     it('non-function parameters', (done) => {
-      assert.throws(() => Proxy.add(1,2,3));
+      assert.throws(() => ProxyHandler.add(1,2,3));
       done();
     });
 
     it('multiple function', (done) => {
-      Proxy.requestHandler = [];
+      ProxyHandler.requestHandler = [];
       const result = [];
 
       const f1 = () => {
@@ -26,25 +26,25 @@ describe('Proxy', () => {
         return 2;
       }
 
-      Proxy.add(f1,f2);
-      assert(Proxy.requestHandler[0]() === 1);
-      assert(Proxy.requestHandler[1]() === 2);
+      ProxyHandler.add(f1,f2);
+      assert(ProxyHandler.requestHandler[0]() === 1);
+      assert(ProxyHandler.requestHandler[1]() === 2);
       done();
     });
 
     it('add single function', (done) => {
-      Proxy.requestHandler = [];
-      Proxy.add(() => {
+      ProxyHandler.requestHandler = [];
+      ProxyHandler.add(() => {
         done();
       });
 
-      Proxy.callProxyHandlers({},{});
+      ProxyHandler.callProxyHandlers({},{});
     });
   });
 
   it('callProxyHandlers', (done) => {
     // clear add functions
-    Proxy.requestHandler = [];
+    ProxyHandler.requestHandler = [];
     const result = [];
 
     const f1 = (req, res, next) => {
@@ -59,8 +59,11 @@ describe('Proxy', () => {
       done();
     }
 
-    Proxy.add(f1,f2);
+    ProxyHandler.add(f1);
+    ProxyHandler.add(f2);
 
-    Proxy.callProxyHandlers({},{});
+    ProxyHandler.callProxyHandlers({
+      isRoutable: false
+    },{});
   });
 });
