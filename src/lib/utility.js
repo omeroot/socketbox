@@ -24,10 +24,14 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   if ( !arr.length ) return approve( resultArray );
 
   const next = ( index ) => {
+    ++index;
+
     if ( arr[ index ] ) {
       try {
-        arr[ index ]( req, res, next.bind( null, index + 1 ) );
+        arr[ index ]( req, res, next.bind( null, index ) );
+        return;
       } catch ( error ) {
+        console.log( error );
         reject( error );
       }
     }
@@ -36,7 +40,7 @@ export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
   };
 
   try {
-    arr[ 0 ]( req, res, next.bind( null, 1 ) );
+    arr[ 0 ]( req, res, next.bind( arr[ 0 ], 0 ) );
   } catch ( error ) {
     reject( error );
   }
@@ -95,5 +99,18 @@ export const urlParser = ( req, res, next ) => {
 
   next();
   return true;
+};
+
+/**
+ * @param {any} res
+ * @param {Function} afterSent
+ */
+export const onFinished = ( res, afterSent: Function ) => {
+  const _fn = res.send;
+
+  res.send = function send ( ...args ) {
+    _fn.apply( _fn, args );
+    afterSent();
+  };
 };
 

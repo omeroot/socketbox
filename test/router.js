@@ -45,32 +45,15 @@ describe('Router', () => {
       router.setPrefix('/api/v1');
   
       assert(router.prefix === '/api/v1');
-      assert(String(router.prefixRegExp) === String(new RegExp( '^/api/v1', 'i' )));
+
+      const regex = pathToRegexp('/api/v1',[], {
+        sensitive : true,
+        strict    : false,
+        end       : false,
+      });
+
+      assert( String(router.prefixRegExp) === String(regex));
       done();
-    });
-  
-    it('runSyncRequestHandler', (done) => {
-      const midOrder = [];
-      const mid1 = (req, res, next) => {
-        midOrder.push(1);
-        req.first = '1';
-        next();
-      }
-      const mid2 = (req, res, next) => {
-        midOrder.push(2);
-        req.second = '2';
-        next();
-      }
-      const last = (req, res) => {
-        midOrder.push(1);
-        assert(midOrder[0] === 1);
-        assert(midOrder[1] === 2);
-        assert(req.first === '1');
-        assert(req.second === '2');
-      }
-  
-      Router.runAsyncRequestHandler([mid1,mid2,last], {}, {})
-      .then(done);
     });
   
     describe('callNextFunctions', () => {
