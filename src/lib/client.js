@@ -95,9 +95,7 @@ export default class Client {
   }
 
   send ( message: any ) {
-    try {
-      this.socket.send( this.constructor.serializeMessage( message ) );
-    } catch ( error ) { /* error */ console.log( error ); }
+    this.socket.send( this.constructor.serializeMessage( message ) );
   }
 
   /**
@@ -110,19 +108,15 @@ export default class Client {
    * @memberof Client
    */
   async handle ( message: string ) {
-    try {
-      const request = new Request( message );
+    const request = new Request( message );
 
-      deserialize( request, this, () => {
-        /**
-         * only call on all request message.
-         * dont support handler, which has request path!!
-         */
-        ProxyHandler.callProxyHandlers( request, this );
-      } );
-    } catch ( error ) {
-      this.send( { statusCode : 500, message : error.message } );
-    }
+    deserialize( request, this, () => {
+      /**
+       * only call on all request message.
+       * dont support handler, which has request path!!
+       */
+      ProxyHandler.callProxyHandlers( request, this );
+    } );
   }
 
   heartbeat () {
@@ -142,15 +136,11 @@ export default class Client {
   }
 
   ping (): Boolean {
-    try {
-      this.send( 'ping' );
-    } catch ( error ) { console.log( error ); return false; }
-
+    this.send( 'ping' );
     return true;
   }
 
-  handleError ( error ) {
-    console.log( `Error: ${error} - ${this.ip}` );
+  handleError () {
     Cache.clearClient( this.__uid__ );
     Channel.leaveRooms( this.__uid__, this.rooms );
   }

@@ -18,34 +18,23 @@ export const randomString   = ( _length ) => {
 };
 
 // TODO: result array fill
-export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
-  const resultArray  = [];
-
-  if ( !arr.length ) return approve( resultArray );
+export const sync = ( arr, req, res ) => new Promise( ( approve ) => {
+  if ( !arr.length ) {
+    approve();
+    return;
+  }
 
   const next = ( index ) => {
     ++index;
 
     if ( arr[ index ] ) {
-      try {
-        arr[ index ]( req, res, next.bind( null, index ) );
-        return;
-      } catch ( error ) {
-        console.log( error );
-        reject( error );
-      }
+      arr[ index ]( req, res, next.bind( null, index ) );
     }
 
     approve();
   };
 
-  try {
-    arr[ 0 ]( req, res, next.bind( arr[ 0 ], 0 ) );
-  } catch ( error ) {
-    reject( error );
-  }
-
-  return true;
+  arr[ 0 ]( req, res, next.bind( arr[ 0 ], 0 ) );
 } );
 
 

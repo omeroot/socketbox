@@ -25,7 +25,7 @@ describe('Router', () => {
       const path = '/test';
       
       router.register(path, (req, res) => {
-        res.send('dmomer');
+        res.send('handler');
       });
 
       assert(router.routePath.indexOf(path) >= 0);
@@ -35,6 +35,24 @@ describe('Router', () => {
       assert(match !== null);
       assert(index === 0);
 
+      done();
+    });
+
+    it('success register same path', (done) => {
+      const router = new Router();
+      const path = '/test';
+      
+      router.register(path, function handler1(req, res){
+        res.send('handler1');
+      });
+
+      router.register(path, function handler2(req, res){
+        res.send('handler2');
+      });
+
+      assert(router.mapping['0'].length === 2);
+      assert(router.mapping['0'][0].name === 'handler1');
+      assert(router.mapping['0'][1].name === 'handler2');
       done();
     })
   });
@@ -53,6 +71,57 @@ describe('Router', () => {
       });
 
       assert( String(router.prefixRegExp) === String(regex));
+      done();
+    });
+
+    it('use with array', (done) => {
+      const router = new Router();
+
+      const f1 = function f1(req, res, next){
+        next();
+      }
+
+      const f2 = function f2(req, res, next){
+        next();
+      }
+
+      router.use([f1, f2]);
+
+      assert(router.middleware.length === 2);
+      assert(router.middleware[0].name === 'f1');
+      assert(router.middleware[1].name === 'f2');
+      done();
+    });
+
+    it('use with array contains invalid argument', (done) => {
+      const router = new Router();
+
+      const f1 = function f1(req, res, next){
+        next();
+      }
+      const f2 = 'f2'
+
+      assert.throws(() => router.use([f1, f2]));
+      done();
+    });
+
+    it('use with single function', (done) => {
+      const router = new Router();
+
+      const f1 = function f1(req, res, next){
+        next();
+      }
+
+      router.use(f1);
+
+      assert(router.middleware.length === 1);
+      assert(router.middleware[0].name === 'f1');
+      done();
+    });
+
+    it('use invalid argument', (done) => {
+      const router = new Router();
+      assert.throws(() => router.use(11));
       done();
     });
   
@@ -89,6 +158,6 @@ describe('Router', () => {
           done();
         });
       });
-    })
+    });
   });
 });

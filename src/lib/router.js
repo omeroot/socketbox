@@ -42,15 +42,10 @@ export default class Router {
 
   async prehandler ( req, res, next ): number {
     if ( this.prefixRegExp.exec( req.pathname ) ) {
-      try {
-        await sync( this.middleware, req, res );
-        const matched = await this.callNextFunctions( req, res );
+      await sync( this.middleware, req, res );
+      const matched = await this.callNextFunctions( req, res );
 
-        if ( !matched ) next();
-      } catch ( error ) {
-        console.log( error );
-        next();
-      }
+      if ( !matched ) next();
     }
   }
 
@@ -69,7 +64,7 @@ export default class Router {
       return;
     }
 
-    throw new TypeError( 'router use params is invalid' );
+    throw new TypeError( 'router use argument is invalid' );
   }
 
   register ( _path: string, ...args: Array<Function> ) {
@@ -127,7 +122,6 @@ export default class Router {
       try {
         await sync( this.mapping[ index.toString() ], req, res );
       } catch ( error ) {
-        console.log( error );
         reject( error );
       }
     } );
