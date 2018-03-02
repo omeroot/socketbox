@@ -4,7 +4,26 @@ import Router from './router';
 export default class ProxyHandler {
   static mountedHandler: Map<string, Router> = new Map();
 
-  static add ( targetPath: string | Function, fn: Function ) {
+  static lazyRouter ( path: string ) {
+    let _r = this.mountedHandler.get( path );
+
+    if ( !_r ) {
+      _r = new Router( path );
+      _r.setPrefix( path );
+
+      this.mountedHandler.set( path, _r );
+    }
+
+    return _r;
+  }
+
+  static dispatch ( _r, to ) {
+    to.use( _r.middleware );
+    to.setPrefix( _r.prefix );
+    this.mountedHandler.set( _r.prefix, to );
+  }
+
+  static add ( targetPath: string | Function | Router, fn: Function | Router ) {
     let _fn;
     let path = '/';
 
@@ -18,33 +37,29 @@ export default class ProxyHandler {
     }
 
     if ( typeof path !== 'string' || !path.length ) throw new TypeError( 'use method path should be string.' );
-    if ( typeof _fn !== 'function' && !( _fn instanceof Router ) ) throw new TypeError( 'use method requires function or router instance.' );
-    if ( this.mountedHandler.has( path ) && _fn instanceof Router ) throw new Error( 'router already cached.' );
-
-    if ( this.mountedHandler.has( path ) ) {
-      const _router = this.mountedHandler.get( path );
-      _router.middleware.push( _fn );
-      return true;
+    if ( typeof _fn !== 'function' && !( _fn instanceof Router ) ) {
+      throw new TypeError( 'use method requires function or router instance.' );
     }
+
+    const router = this.lazyRouter( path );
 
     if ( _fn instanceof Router ) {
-      _fn.setPrefix( path );
-      this.mountedHandler.set( path, _fn );
+      this.dispatch( router, _fn );
       return true;
     }
 
-    const newRouter = new Router( path );
+    if ( typeof _fn === 'function' ) {
+      router.use( _fn );
+      return true;
+    }
 
-    newRouter.middleware.push( _fn );
-    this.mountedHandler.set( path, newRouter );
-
-    return true;
+    return false;
   }
 
   static async callProxyHandlers ( req, res ) {
     const iterator = this.mountedHandler.entries();
 
-    const runner = () => {
+    const runner = async () => {
       const v = iterator.next();
 
       if ( !v.done ) {

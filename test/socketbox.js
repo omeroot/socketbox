@@ -178,6 +178,96 @@ describe('Socketbox app', () => {
         assert(r.prefix === '/api/v1');
         done();
       });
-    })
+
+      it('add already exist router - same prefix', (done) => {
+        const app = new Socketbox();
+
+        const r = new Socketbox.Router();
+
+        app.use(function(req, res, next){
+          next();
+        });
+
+        var preRouter = ProxyHandler.mountedHandler.get('/');
+        assert(preRouter.middleware.length === 1);
+
+        app.use('/', r);
+
+        r.register('/hello', (req, res) => {});
+
+        var referenced = ProxyHandler.mountedHandler.get('/');
+
+        assert(referenced.middleware.length === 1);
+
+        done();
+      });
+
+      it('common middleware (running every request) and router not found path request', (done) => {
+        const app = new Socketbox();
+        const r = new Socketbox.Router();
+        const result = [];
+
+        app.use('/api/v1', r);
+
+        const f1 = (req, res, next) => {
+          result.push('1');
+          next();
+        }
+    
+        const f2 = (req, res, next) => {
+          result.push('2');
+          next();
+        }
+    
+        const apif1 = (req, res, next) => {
+          result.push('99');
+          next();
+        }
+
+        app.use(f1);
+        app.use(f2);
+
+        r.register('/user/list', apif1);
+
+        ProxyHandler.callProxyHandlers({pathname: '/api/v1/user/write'},{
+          send: function(_404Response){
+            assert(result[0] === '1');
+            assert(result[1] === '2');
+            assert(result.indexOf('99') < 0);
+            assert(_404Response.statusCode === 404);
+            done();
+          }
+        });
+      });
+
+      it('router middleware (running this router) and router found path request', (done) => {
+        const app = new Socketbox();
+        const r = new Socketbox.Router();
+        const result = [];
+
+        const f1 = (req, res, next) => {
+          result.push('1');
+          next();
+        }
+
+        const callapif1 = (req, res) => {
+          res.send({statusCode: 200});
+        }
+
+
+        app.use('/api/v1', r);
+        app.use('/api/v1',f1);
+
+        r.register('/user/list', callapif1);
+
+        ProxyHandler.callProxyHandlers({pathname: '/api/v1/user/list'},{
+          send: function(Response){
+            assert(result[0] === '1');
+            assert(Response.statusCode === 200);
+            done();
+          }
+        });
+      });
+    });
   });
 });

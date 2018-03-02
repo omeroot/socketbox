@@ -27,7 +27,7 @@ describe('Utility', () => {
   describe('sync', () => {
     it('empty array', (done) => {
       sync([]).then((result) => {
-        assert(result.length === 0);
+        assert(result === undefined);
         done();
       });
     });

@@ -18,30 +18,23 @@ export const randomString   = ( _length ) => {
 };
 
 // TODO: result array fill
-export const sync = ( arr, req, res ) => new Promise( ( approve, reject ) => {
-  const resultArray  = [];
-
-  if ( !arr.length ) return approve( resultArray );
+export const sync = ( arr, req, res ) => new Promise( ( approve ) => {
+  if ( !arr.length ) {
+    approve();
+    return;
+  }
 
   const next = ( index ) => {
+    ++index;
+
     if ( arr[ index ] ) {
-      try {
-        arr[ index ]( req, res, next.bind( null, index + 1 ) );
-      } catch ( error ) {
-        reject( error );
-      }
+      arr[ index ]( req, res, next.bind( null, index ) );
     }
 
     approve();
   };
 
-  try {
-    arr[ 0 ]( req, res, next.bind( null, 1 ) );
-  } catch ( error ) {
-    reject( error );
-  }
-
-  return true;
+  arr[ 0 ]( req, res, next.bind( arr[ 0 ], 0 ) );
 } );
 
 
@@ -95,5 +88,18 @@ export const urlParser = ( req, res, next ) => {
 
   next();
   return true;
+};
+
+/**
+ * @param {any} res
+ * @param {Function} afterSent
+ */
+export const onFinished = ( res, afterSent: Function ) => {
+  const _fn = res.send;
+
+  res.send = function send ( ...args ) {
+    _fn.apply( _fn, args );
+    afterSent();
+  };
 };
 

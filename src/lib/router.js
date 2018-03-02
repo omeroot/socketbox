@@ -41,14 +41,30 @@ export default class Router {
   }
 
   async prehandler ( req, res, next ): number {
-    let matched;
-
-    if ( this.prefixRegExp.test( req.pathname ) ) {
+    if ( this.prefixRegExp.exec( req.pathname ) ) {
       await sync( this.middleware, req, res );
-      matched = await this.callNextFunctions( req, res );
+      const matched = await this.callNextFunctions( req, res );
+
+      if ( !matched ) next();
+    }
+  }
+
+  use ( fn ) {
+    if ( Array.isArray( fn ) ) {
+      fn.forEach( ( func ) => {
+        if ( typeof func === 'function' ) return this.middleware.push( func );
+        throw new TypeError( 'router use item should be function' );
+      } );
+
+      return;
     }
 
-    if ( !matched ) next();
+    if ( typeof fn === 'function' ) {
+      this.middleware.push( fn );
+      return;
+    }
+
+    throw new TypeError( 'router use argument is invalid' );
   }
 
   register ( _path: string, ...args: Array<Function> ) {
@@ -71,13 +87,13 @@ export default class Router {
     return true;
   }
 
-  setPrefix ( prefix: string ) {
+  setPrefix ( prefix: string, opts: Object ) {
     this.prefix = prefix;
-    this.prefixRegExp = new RegExp( `^${prefix}`, 'i' );
-  }
-
-  static runAsyncRequestHandler ( handler: Array<Function>, req: any, res: any ) {
-    return sync( handler, req, res );
+    this.prefixRegExp = pathToRegexp( prefix, [], opts || {
+      sensitive : true,
+      strict    : false,
+      end       : false,
+    } );
   }
 
   findAndGetPathInMap ( pathnameOnReq ) {
@@ -93,22 +109,21 @@ export default class Router {
     return { match, index };
   }
 
-  async callNextFunctions ( req: Request, res: any ) {
-    const { pathname } = req;
-    const { match, index } = this.findAndGetPathInMap( pathname );
+  callNextFunctions ( req: Request, res: any ) {
+    return new Promise( async ( resolve, reject ) => {
+      const { pathname } = req;
+      const { match, index } = this.findAndGetPathInMap( pathname );
 
-    if ( !match ) {
-      return false;
-    }
+      if ( !match ) {
+        resolve( false );
+        return;
+      }
 
-    try {
-      await this.constructor.runAsyncRequestHandler( this.mapping[ index.toString() ], req, res );
-      req.at_finish = Date.now();
-
-      return true;
-    } catch ( error ) {
-      console.log( error );
-      return false;
-    }
+      try {
+        await sync( this.mapping[ index.toString() ], req, res );
+      } catch ( error ) {
+        reject( error );
+      }
+    } );
   }
 }
