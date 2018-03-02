@@ -1,6 +1,6 @@
 {
   "name": "socketbox",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Socketbox is real time socket layer framework inspired by express",
   "main": "dist/socketbox.js",
   "scripts": {
