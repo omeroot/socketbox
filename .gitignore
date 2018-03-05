@@ -1,0 +1,12 @@
+node_modules
+dist
+*.log
+.idea
+.DS_Store
+!src/.gitkeep
+.vscode
+.temp
+public
+package-lock.json
+.nyc_output
+coverage
