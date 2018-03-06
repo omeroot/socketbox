@@ -17,3 +17,8 @@ script:
 after_success:
   - npm run cov
   - "npm install coveralls@3 && nyc report --reporter=text-lcov | coveralls"
+
+branches:
+  only:
+    - master
+    - dev
