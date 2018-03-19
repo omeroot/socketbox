@@ -68,11 +68,12 @@ export default class Client {
    * @returns
    * @memberof Client
    */
-  static serializeMessage ( message: any ) {
+  static serializeMessage ( message: any, headers?: Object ) {
     let raw = '';
 
     if ( typeof message === 'object' ) {
-      raw = JSON.stringify( message );
+      const _message = Object.assign( headers, { body : message } );
+      raw = JSON.stringify( _message );
     } else {
       raw = message.toString() || '';
     }
@@ -90,12 +91,12 @@ export default class Client {
     return true;
   }
 
-  sendTo ( message: any, cname: string ) {
-    Channel.publish( this.constructor.serializeMessage( message ), cname );
+  sendTo ( message: any, cname: string, headers?: Object ) {
+    Channel.publish( this.constructor.serializeMessage( message, headers ), cname );
   }
 
-  send ( message: any ) {
-    this.socket.send( this.constructor.serializeMessage( message ) );
+  send ( message: any, headers?: Object ) {
+    this.socket.send( this.constructor.serializeMessage( message, headers ) );
   }
 
   /**
