@@ -4,7 +4,7 @@
 import { EventEmitter } from 'events';
 import _Router from './router';
 import Client from './client';
-import Cache from './cache';
+import _Cache from './cache';
 import ProxyHandler from './proxy-handler';
 import { pingPong } from './utility';
 
@@ -37,11 +37,11 @@ export default class Socketbox extends EventEmitter {
   }
 
   static Cache () {
-    return Cache;
+    return _Cache;
   }
 
   checkAliveSockets () {
-    for ( const client of Cache.clientsMap.values() ) {
+    for ( const client of _Cache.clientsMap.values() ) {
       if ( !client.getIsAlive() ) {
         this.onClientIsDead( client );
         return;
@@ -73,7 +73,7 @@ export default class Socketbox extends EventEmitter {
 
   destroyClient ( client ) {
     client.terminate();
-    Cache.clearClient( client.__uid__ );
+    _Cache.clearClient( client.__uid__ );
 
     return this;
   }
@@ -81,7 +81,7 @@ export default class Socketbox extends EventEmitter {
   onConnected ( socket: any, req: any ) {
     const newClient = new Client( socket, req );
 
-    Cache.sPush( newClient.__uid__, newClient );
+    _Cache.sPush( newClient.__uid__, newClient );
     this.emit( 'connected', newClient );
 
     return newClient;
