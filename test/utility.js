@@ -87,8 +87,10 @@ describe('Utility', () => {
       const res = {};
 
       deserialize(req, res, () => {
-        assert(urlParser(req) === false);
-        done();
+        urlParser(req, res, (Result) => {
+          assert(Result === false);
+          done();
+        })
       });
     });
   });

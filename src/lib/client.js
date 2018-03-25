@@ -4,7 +4,7 @@ import Cache from './cache';
 import Channel from './channel';
 import ProxyHandler from './proxy-handler';
 import Request from './request';
-import { deserialize } from './utility';
+import { deserialize, urlParser } from './utility';
 
 export default class Client {
   __uid__: string = crypto.randomBytes( 12 ).toString( 'hex' );
@@ -115,7 +115,9 @@ export default class Client {
        * only call on all request message.
        * dont support handler, which has request path!!
        */
-      ProxyHandler.callProxyHandlers( request, this );
+      urlParser( request, this, () => {
+        ProxyHandler.callProxyHandlers( request, this );
+      } );
     } );
   }
 

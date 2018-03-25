@@ -38,7 +38,7 @@ describe('Router', () => {
       done();
     });
 
-    it('success register same path', (done) => {
+    it('success register same path /test', (done) => {
       const router = new Router();
       const path = '/test';
       
@@ -55,7 +55,21 @@ describe('Router', () => {
       assert(router.mapping['0'][1].name === 'handler2');
       done();
     })
+
+    it('success register path / and pre handler', (done) => {
+      const router = new Router();
+      const path = '/';
+
+      router.setPrefix('/');
+
+      router.register('/api/v1', function handler1(req, res){
+        done();
+      });
+
+      router.prehandler({pathname: '/api/v1'}, {send: function(){}}, function(){});
+    })
   });
+  
 
   describe('Methods', () => {
     it('Set prefix', (done) => {

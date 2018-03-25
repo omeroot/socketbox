@@ -70,7 +70,7 @@ export const pingPong = ( req, res, next ) => {
 };
 
 export const urlParser = ( req, res, next ) => {
-  if ( !req.isRoutable ) return false;
+  if ( !req.isRoutable ) return next( false );
 
   const urlObject = new URL( req.headers.url );
 
@@ -86,8 +86,7 @@ export const urlParser = ( req, res, next ) => {
   req.hostname = urlObject.hostname;
   req.href = urlObject.href;
 
-  next();
-  return true;
+  return next( true );
 };
 
 /**
